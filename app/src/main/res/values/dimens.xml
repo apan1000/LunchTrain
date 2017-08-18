@@ -1,3 +1,11 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="list_item_padding_vertical">16dp</dimen>
+    <dimen name="list_item_padding_horizontal">16dp</dimen>
+    <dimen name="activity_margin_vertical">16dp</dimen>
+    <dimen name="activity_margin_horizontal">16dp</dimen>
+
+    <dimen name="login_title_text_size">40sp</dimen>
+    <dimen name="login_text_size">16sp</dimen>
 </resources>
