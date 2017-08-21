@@ -2,7 +2,7 @@
     <string name="app_name">Lunch Train</string>
     <string name="action_settings">Settings</string>
 
-    <string name="welcome_message">Welcome to Lunch Train!\nChoo! Choo!</string>
+    <string name="welcome_message">Welcome to Lunch Train!\nChew! Chew!</string>
 
     <string name="action_sign_out">Sign out</string>
     <!-- Sign-in status messages -->

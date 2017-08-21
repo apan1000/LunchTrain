@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name">Lunchtåget</string>
     <string name="action_settings">Inställningar</string>
-    <string name="welcome_message">Väkommen till Lunchtåget!\nTuff! Tuff!</string>
+    <string name="welcome_message">Väkommen till Lunchtåget!\nTugg! Tugg!</string>
 </resources>
