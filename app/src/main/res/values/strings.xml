@@ -5,6 +5,8 @@
 
     <string name="welcome_message">Welcome to Lunch Train!\nChew! Chew!</string>
 
+    <string name="test_description">Test Description Test Description Test Description Test Description Test Description Test Description</string>
+
     <!-- Sign-in status messages -->
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="signed_in">Signed in</string>

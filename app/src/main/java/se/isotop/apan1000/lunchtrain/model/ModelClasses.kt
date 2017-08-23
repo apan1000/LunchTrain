@@ -1,5 +1,6 @@
 package se.isotop.apan1000.lunchtrain.model
 
+
 /**
  * Created by apan1000 on 2017-08-17.
  */
@@ -14,6 +15,15 @@ data class Train(var title: String = "",
                  var description: String = "",
                  var time: String = "",
                  var imgUrl: String = "",
-                 var passengers: List<String> = mutableListOf(),
                  var passengerCount: Int = 0,
-                 val uid: String = "")
+                 var passengers: List<String> = mutableListOf(),
+                 val uid: String = "") {
+
+    fun toMap() : Map<String, Any> {
+        return hashMapOf("title" to title,
+                "description" to description,
+                "time" to time,
+                "imgUrl" to imgUrl,
+                "passengerCount" to passengerCount)
+    }
+}

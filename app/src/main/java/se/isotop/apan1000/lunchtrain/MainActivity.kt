@@ -15,13 +15,14 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.firebase.ui.database.FirebaseRecyclerAdapter
+import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
 import se.isotop.apan1000.lunchtrain.model.Train
 import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
-
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -69,9 +70,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 // Bind Train to ViewHolder, setting OnClickListener for the join button
-                viewHolder.bindTrain(model, trainKey, View.OnClickListener {
-                    onJoinClicked(trainKey)
-                })
+                viewHolder.bindTrain(model, trainKey)
 
                 showTrainsView()
             }
@@ -83,9 +82,14 @@ class MainActivity : AppCompatActivity() {
         loadingIndicator = findViewById(R.id.pb_loading_indicator)
         showLoading()
 
+        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date())
+
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            writeNewTrain("Något ställe", "Vi går och käkar",
+                    timeStamp, "http://i.huffpost.com/gen/4451422/images/o-FOOD-facebook.jpg",
+                    0)
+//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                    .setAction("Action", null).show()
         }
     }
 
@@ -98,25 +102,23 @@ class MainActivity : AppCompatActivity() {
         // TODO: Create some trains
     }
 
-    private fun writeNewTrain(title: String, description: String, time: String, imgUrl: String, passengerCount: String) {
+    private fun writeNewTrain(title: String, description: String, time: String, imgUrl: String, passengerCount: Int) : Task<Void> {
         // TODO: Fix
         val key = databaseRef.child("trains").push().key
-        val train = HashMap<String, Any>()
-        train.put("title", "Något ställe")
-        train.put("description", "Vi går och käkar")
-        train.put("time", "2017-08-30 11:15:00")
-        train.put("imgUrl", "http://i.huffpost.com/gen/4451422/images/o-FOOD-facebook.jpg")
-        train.put("passengerCount", 0)
+        val train = Train(title, description, time, imgUrl)
+//        val train = HashMap<String, Any>()
+//        train.put("title", "Något ställe")
+//        train.put("description", "Vi går och käkar")
+//        train.put("time", "2017-08-30 11:15:00")
+//        train.put("imgUrl", "http://i.huffpost.com/gen/4451422/images/o-FOOD-facebook.jpg")
+//        train.put("passengerCount", 0)
+
+         val trainValues = train.toMap()
 
         val childUpdates = HashMap<String, Any>()
-        childUpdates.put("/trains/" + key, train)
+        childUpdates.put("/trains/" + key, trainValues)
 
-        databaseRef.updateChildren(childUpdates)
-    }
-
-    private fun onJoinClicked(trainKey: String) {
-        val trainsRef: DatabaseReference = databaseRef.child("trains").child(trainKey)
-        val passengersRef: DatabaseReference = databaseRef.child("passengers").child(trainKey)
+        return databaseRef.updateChildren(childUpdates)
     }
 
     private fun showTrainsView() {
