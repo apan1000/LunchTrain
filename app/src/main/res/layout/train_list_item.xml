@@ -1,54 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_view"
-    android:layout_gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="@dimen/activity_margin_horizontal"
-    android:layout_marginRight="@dimen/activity_margin_horizontal"
-    card_view:cardElevation="2dp"
-    card_view:cardCornerRadius="4dp">
+    android:layout_height="340dp"
+    android:layout_gravity="center"
+    android:layout_marginBottom="@dimen/card_margin_vertical"
+    android:layout_marginLeft="@dimen/card_margin_horizontal"
+    android:layout_marginRight="@dimen/card_margin_horizontal"
+    card_view:cardCornerRadius="@dimen/card_radius"
+    card_view:cardElevation="@dimen/card_elevation"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
-    <ImageView
-        android:id="@+id/train_image"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_height="match_parent">
 
-    <!--android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/list_item_padding_vertical"
-        android:paddingLeft="@dimen/list_item_padding_horizontal"
-        android:paddingRight="@dimen/list_item_padding_horizontal"
-        android:paddingTop="@dimen/list_item_padding_vertical"-->
+        <ImageView
+            android:id="@+id/train_image"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/card_image_height"
+            android:scaleType="centerCrop"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            card_view:layout_constraintBottom_toTopOf="@+id/guideline_image_bottom"
+            app:srcCompat="@drawable/ic_launcher_background"/>
 
         <TextView
             android:id="@+id/train_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/card_title_background"
+            android:paddingBottom="@dimen/card_title_padding"
+            android:paddingLeft="@dimen/card_title_padding"
+            android:paddingRight="@dimen/card_title_padding"
+            android:paddingTop="@dimen/card_title_padding"
+            android:textColor="@color/white"
+            android:textSize="@dimen/card_title"
+            card_view:layout_constraintBottom_toBottomOf="@+id/train_image"
             tools:text="Barbeque Steakhouse &amp; Bar" />
 
-        <TextView
-            android:id="@+id/train_time"
+        <android.support.v7.widget.LinearLayoutCompat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            app:layout_constraintTop_toBottomOf="@+id/train_title"
-            tools:text="11:30" />
+            app:layout_constraintTop_toBottomOf="@+id/train_image"
+            android:paddingTop="6dp"
+            android:paddingLeft="6dp"
+            android:id="@+id/linearLayoutCompat">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:srcCompat="@drawable/ic_access_time_black_24dp"/>
+
+            <TextView
+                android:id="@+id/train_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:fontFamily="sans-serif-light"
+                android:textSize="@dimen/card_time"
+                tools:text="11:30" />
+
+        </android.support.v7.widget.LinearLayoutCompat>
+
+        <ImageButton
+            android:id="@+id/join_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:srcCompat="@drawable/ic_check_circle_grey_24dp"
+            android:scaleType="fitCenter"
+            app:layout_constraintTop_toBottomOf="@+id/train_image"
+            app:layout_constraintRight_toRightOf="parent" />
 
         <android.support.constraint.Guideline
-            android:id="@+id/guideline"
+            android:id="@+id/guideline_image_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            />
+            card_view:layout_constraintGuide_percent="0.6" />
 
-    <!--/android.support.constraint.ConstraintLayout-->
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.v7.widget.CardView>

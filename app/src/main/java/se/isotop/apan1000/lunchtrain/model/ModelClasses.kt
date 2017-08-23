@@ -10,5 +10,10 @@ data class TrainList(private val trains: List<Train>) {
     operator fun get(position: Int) = trains[position]
 }
 
-data class Train(val id: Long, var title: String, var description: String, var time: Long,
-                 var imgUrl: String)
+data class Train(var title: String = "",
+                 var description: String = "",
+                 var time: String = "",
+                 var imgUrl: String = "",
+                 var passengers: List<String> = mutableListOf(),
+                 var passengerCount: Int = 0,
+                 val uid: String = "")

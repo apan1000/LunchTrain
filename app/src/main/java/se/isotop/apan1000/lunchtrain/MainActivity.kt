@@ -1,10 +1,6 @@
 package se.isotop.apan1000.lunchtrain
 
 import android.content.Intent
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.CursorLoader
-import android.support.v4.content.Loader
-import android.database.Cursor
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
@@ -15,21 +11,29 @@ import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.ProgressBar
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.firebase.ui.database.FirebaseRecyclerAdapter
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import se.isotop.apan1000.lunchtrain.model.Train
+import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
 
 
-class MainActivity : AppCompatActivity(),
-        LoaderManager.LoaderCallbacks<Cursor>,
-        TrainAdapter.TrainAdapterOnClickHandler {
 
-    private val ID_TRAIN_LOADER = 25;
 
-    lateinit private var mTrainAdapter: TrainAdapter
-    lateinit private var mRecyclerView: RecyclerView
-    private var mPosition = RecyclerView.NO_POSITION
+class MainActivity : AppCompatActivity() {
 
-    lateinit private var mLoadingIndicator: ProgressBar
+    private val TAG = "MainActivity"
+
+    lateinit private var databaseRef: DatabaseReference
+
+    lateinit private var adapter: FirebaseRecyclerAdapter<Train, TrainViewHolder>
+    lateinit private var recycler: RecyclerView
+
+    lateinit private var loadingIndicator: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,27 +42,46 @@ class MainActivity : AppCompatActivity(),
 
         // Do something with the intent
         val userName = intent.getStringExtra("name")
-        Toast.makeText(this, "Started by $userName", Toast.LENGTH_LONG)
+        Toast.makeText(this, "Started by $userName", Toast.LENGTH_SHORT).show()
         //
 
-        mRecyclerView = findViewById(R.id.recyclerview_trains)
-
-        mLoadingIndicator = findViewById(R.id.pb_loading_indicator)
+        recycler = findViewById(R.id.recyclerview_trains)
+        recycler.setHasFixedSize(true)
 
         val layoutManager =  LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        mRecyclerView.layoutManager = layoutManager
+        recycler.layoutManager = layoutManager
 
-        mRecyclerView.setHasFixedSize(true)
+        databaseRef = FirebaseDatabase.getInstance().reference
+        val trainsQuery: Query = getQuery(databaseRef)
 
-        /*
-         * The TrainAdapter is responsible for linking our train data with the Views that
-         * will end up displaying our data.
-         */
-        mTrainAdapter = TrainAdapter(this, this);
+        adapter = object : FirebaseRecyclerAdapter<Train, TrainViewHolder>(Train::class.java, R.layout.train_list_item,
+                TrainViewHolder::class.java, trainsQuery) {
 
+            override fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
+                val trainRef = getRef(position)
+
+                // Set click listener for the whole train view
+                val trainKey = trainRef.key
+                viewHolder.itemView.setOnClickListener {
+                    val intent = Intent(baseContext, TrainDetailActivity::class.java)
+                    intent.putExtra(TrainDetailActivity.EXTRA_TRAIN_KEY, trainKey)
+                    startActivity(intent)
+                }
+
+                // Bind Train to ViewHolder, setting OnClickListener for the join button
+                viewHolder.bindTrain(model, trainKey, View.OnClickListener {
+                    onJoinClicked(trainKey)
+                })
+
+                showTrainsView()
+            }
+
+        }
+
+        recycler.adapter = adapter
+
+        loadingIndicator = findViewById(R.id.pb_loading_indicator)
         showLoading()
-
-        //supportLoaderManager.initLoader(ID_TRAIN_LOADER, null, this)
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -66,36 +89,56 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        adapter.cleanup()
+    }
+
     private fun createMockData() {
         // TODO: Create some trains
     }
 
-    override fun onClick(id: Long) {
-        // TODO: Show train with id
+    private fun writeNewTrain(title: String, description: String, time: String, imgUrl: String, passengerCount: String) {
+        // TODO: Fix
+        val key = databaseRef.child("trains").push().key
+        val train = HashMap<String, Any>()
+        train.put("title", "Något ställe")
+        train.put("description", "Vi går och käkar")
+        train.put("time", "2017-08-30 11:15:00")
+        train.put("imgUrl", "http://i.huffpost.com/gen/4451422/images/o-FOOD-facebook.jpg")
+        train.put("passengerCount", 0)
+
+        val childUpdates = HashMap<String, Any>()
+        childUpdates.put("/trains/" + key, train)
+
+        databaseRef.updateChildren(childUpdates)
+    }
+
+    private fun onJoinClicked(trainKey: String) {
+        val trainsRef: DatabaseReference = databaseRef.child("trains").child(trainKey)
+        val passengersRef: DatabaseReference = databaseRef.child("passengers").child(trainKey)
     }
 
     private fun showTrainsView() {
-        mLoadingIndicator.visibility = View.INVISIBLE
+        loadingIndicator.visibility = View.INVISIBLE
 
-        mRecyclerView.visibility = View.VISIBLE
+        recycler.visibility = View.VISIBLE
     }
 
     private fun showLoading() {
-        mRecyclerView.visibility = View.INVISIBLE
+        recycler.visibility = View.INVISIBLE
 
-        mLoadingIndicator.visibility = View.VISIBLE
+        loadingIndicator.visibility = View.VISIBLE
     }
 
-    override fun onCreateLoader(loaderId: Int, bundle: Bundle?): Loader<Cursor> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    private fun signOut() {
+        // Start LoginActivity, tell it to sign out
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.putExtra("signout", true)
+        startActivity(intent)
 
-    override fun onLoadFinished(loader: Loader<Cursor>?, data: Cursor?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onLoaderReset(loader: Loader<Cursor>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // Finish activity
+        finish()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -109,6 +152,17 @@ class MainActivity : AppCompatActivity(),
             startActivity(Intent(this, SettingsActivity::class.java))
             true
         }
+        R.id.action_sign_out -> {
+            signOut()
+            true
+        }
         else -> super.onOptionsItemSelected(item)
+    }
+
+    private fun getQuery(databaseReference: DatabaseReference): Query {
+        // Last 100 posts, these are automatically the 100 most recent
+        // due to sorting by push() keys
+        return databaseReference.child("trains")
+                .limitToFirst(100)
     }
 }

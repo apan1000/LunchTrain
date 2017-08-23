@@ -17,14 +17,10 @@ import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseUser
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
-import com.google.firebase.auth.AuthResult
-import com.google.android.gms.tasks.Task
-import android.support.annotation.NonNull
 import android.widget.Button
 import android.widget.ProgressBar
-import com.google.android.gms.tasks.OnCompleteListener
+import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.AuthCredential
 
 
 class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -32,13 +28,13 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     private val TAG = "LoginActivity"
     private val RC_SIGN_IN = 325
 
-    lateinit private var mDatabase: DatabaseReference
-    lateinit private var mAuth: FirebaseAuth
-    lateinit private var mGoogleApiClient: GoogleApiClient
+    lateinit private var databaseRef: DatabaseReference
+    lateinit private var auth: FirebaseAuth
+    lateinit private var googleApiClient: GoogleApiClient
 
-    lateinit private var mLoadingIndicator: ProgressBar
-    lateinit private var mSignInButton: SignInButton
-    lateinit private var mSignOutButton: Button
+    lateinit private var loadingIndicator: ProgressBar
+    lateinit private var signInButton: SignInButton
+    lateinit private var signOutButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,34 +46,49 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
 
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
-        mGoogleApiClient = GoogleApiClient.Builder(this)
+        googleApiClient = GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+                .build()
 
-        mAuth = FirebaseAuth.getInstance()
+        googleApiClient.connect()
+
+        auth = FirebaseAuth.getInstance()
 
         setContentView(R.layout.activity_login)
 
-        mLoadingIndicator = findViewById(R.id.login_loading_indicator)
+        loadingIndicator = findViewById(R.id.login_loading_indicator)
 
-        mSignInButton = findViewById(R.id.sign_in_button)
-        mSignInButton.setSize(SignInButton.SIZE_WIDE)
-        mSignInButton.setOnClickListener(this)
+        signInButton = findViewById(R.id.sign_in_button)
+        signInButton.setSize(SignInButton.SIZE_WIDE)
+        signInButton.setOnClickListener(this)
 
-        mSignOutButton = findViewById(R.id.sign_out_button)
-        mSignOutButton.setOnClickListener(this)
+        signOutButton = findViewById(R.id.sign_out_button)
+        signOutButton.setOnClickListener(this)
+
+
     }
 
     override fun onStart() {
         super.onStart()
 
-        if(mAuth.currentUser != null) {
+        googleApiClient.connect()
+        val shouldSignOut = intent.getBooleanExtra("signout", false)
+        if(shouldSignOut) {
+            signOut() //TODO: GoogleApiClient is not connected yet.
+        }
+
+        if(auth.currentUser != null) {
             showSignOutButton()
-            startMainActivity(mAuth.currentUser)
+            startMainActivity(auth.currentUser)
         } else {
             showSignInButton()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        googleApiClient.disconnect()
     }
 
    /* private fun onAuthSuccess(user: FirebaseUser) {
@@ -94,17 +105,22 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     private fun writeNewUser(userId: String, name: String, email: String) {
         val user = User(name, email)
 
-        mDatabase.child("users").child(userId).setValue(user)
+        databaseRef.child("users").child(userId).setValue(user)
     }*/
 
     private fun signOut() {
         showSignInButton()
-        mAuth.signOut()
+        auth.signOut()
+        // Google sign out
+        AuthUI.getInstance().signOut(this).addOnCompleteListener {
+            // do something here
+        }
+        //Auth.GoogleSignInApi.signOut(googleApiClient)
     }
 
     private fun signIn() {
         showLoading()
-        val signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
+        val signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient)
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
@@ -137,12 +153,12 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         Log.d(TAG, "Google JWT : ${acct?.idToken}\n")
 
         val credential = GoogleAuthProvider.getCredential(acct?.idToken, null)
-        mAuth.signInWithCredential(credential)
+        auth.signInWithCredential(credential)
                 .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
-                    val user = mAuth.currentUser
+                    val user = auth.currentUser
                     startMainActivity(user)
                 } else {
                     // If sign in fails, display a message to the user.
@@ -160,26 +176,27 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         intent.putExtra("id", user?.providerId)
         intent.putExtra("name", user?.displayName)
         startActivity(intent)
+        finish()
     }
 
     private fun showLoading() {
-        mSignInButton.visibility = View.INVISIBLE
-        mSignOutButton.visibility = View.INVISIBLE
+        signInButton.visibility = View.INVISIBLE
+        signOutButton.visibility = View.INVISIBLE
 
-        mLoadingIndicator.visibility = View.VISIBLE
+        loadingIndicator.visibility = View.VISIBLE
     }
 
     private fun showSignInButton() {
-        mLoadingIndicator.visibility = View.INVISIBLE
-        mSignOutButton.visibility = View.INVISIBLE
+        loadingIndicator.visibility = View.INVISIBLE
+        signOutButton.visibility = View.INVISIBLE
 
-        mSignInButton.visibility = View.VISIBLE
+        signInButton.visibility = View.VISIBLE
     }
 
     private fun showSignOutButton() {
-        mSignInButton.visibility = View.INVISIBLE
+        signInButton.visibility = View.INVISIBLE
 
-        mSignOutButton.visibility = View.VISIBLE
+        signOutButton.visibility = View.VISIBLE
     }
 
     override fun onConnectionFailed(result: ConnectionResult) {
