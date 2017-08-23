@@ -28,6 +28,7 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                     .into(itemView.train_image)
         }
 
+        showLoadingJoinButton()
         FirebaseDatabase.getInstance().reference.child("passengers").child(trainKey).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Determine if the current user has joined this train and set UI accordingly
@@ -36,6 +37,7 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 } else {
                     itemView.join_button.setImageResource(R.drawable.ic_check_circle_grey_24dp)
                 }
+                showJoinButton()
             }
 
             override fun onCancelled(p0: DatabaseError?) {
@@ -46,5 +48,15 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private fun getUid(): String? {
         return FirebaseAuth.getInstance().currentUser?.uid
+    }
+
+    private fun showLoadingJoinButton() {
+        itemView.join_button.visibility = View.INVISIBLE
+        itemView.join_loading_indicator.visibility = View.VISIBLE
+    }
+
+    private fun showJoinButton() {
+        itemView.join_loading_indicator.visibility = View.INVISIBLE
+        itemView.join_button.visibility = View.VISIBLE
     }
 }
