@@ -12,6 +12,7 @@ import com.google.android.gms.common.SignInButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -21,6 +22,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.FirebaseDatabase
 
 
 class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -28,7 +30,7 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     private val TAG = "LoginActivity"
     private val RC_SIGN_IN = 325
 
-    lateinit private var databaseRef: DatabaseReference
+    val databaseRef = FirebaseDatabase.getInstance().reference
     lateinit private var auth: FirebaseAuth
     lateinit private var googleApiClient: GoogleApiClient
 
@@ -91,23 +93,6 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         googleApiClient.disconnect()
     }
 
-   /* private fun onAuthSuccess(user: FirebaseUser) {
-        val username = usernameFromEmail(user.email)
-
-        // Write new user
-        writeNewUser(user.uid, username, user.email)
-
-        // Go to MainActivity
-        startActivity(Intent(this@SignInActivity, MainActivity::class.java))
-        finish()
-    }
-
-    private fun writeNewUser(userId: String, name: String, email: String) {
-        val user = User(name, email)
-
-        databaseRef.child("users").child(userId).setValue(user)
-    }*/
-
     private fun signOut() {
         showSignInButton()
         auth.signOut()
@@ -159,7 +144,8 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
                     val user = auth.currentUser
-                    startMainActivity(user)
+
+                    onAuthSuccess(user)
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
@@ -168,6 +154,24 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
                     showSignInButton()
                 }
             }
+    }
+
+    private fun onAuthSuccess(user: FirebaseUser?) {
+        // Write new user
+        writeNewUser(user?.uid, user?.displayName, user?.email, user?.photoUrl.toString())
+
+        // Go to MainActivity
+        startMainActivity(user)
+    }
+
+    private fun writeNewUser(userId: String?, username: String?, email: String?, photoUrl: String?) {
+        val user = mutableMapOf<String, Any?>(
+                "username" to username,
+                "email" to email,
+                "photoUrl" to photoUrl,
+                "passengerAt" to "")
+
+        databaseRef.child("users").child(userId).setValue(user)
     }
 
     private fun startMainActivity(user: FirebaseUser?) {
