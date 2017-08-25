@@ -10,9 +10,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.SignInButton
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -22,7 +20,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 
 
 class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -67,8 +65,6 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
 
         signOutButton = findViewById(R.id.sign_out_button)
         signOutButton.setOnClickListener(this)
-
-
     }
 
     override fun onStart() {
@@ -77,12 +73,12 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         googleApiClient.connect()
         val shouldSignOut = intent.getBooleanExtra("signout", false)
         if(shouldSignOut) {
-            signOut() //TODO: GoogleApiClient is not connected yet.
+            signOut()
         }
 
         if(auth.currentUser != null) {
             showSignOutButton()
-            startMainActivity(auth.currentUser)
+            startTrainListActivity(auth.currentUser)
         } else {
             showSignInButton()
         }
@@ -100,7 +96,6 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         AuthUI.getInstance().signOut(this).addOnCompleteListener {
             // do something here
         }
-        //Auth.GoogleSignInApi.signOut(googleApiClient)
     }
 
     private fun signIn() {
@@ -157,11 +152,26 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     }
 
     private fun onAuthSuccess(user: FirebaseUser?) {
-        // Write new user
-        writeNewUser(user?.uid, user?.displayName, user?.email, user?.photoUrl.toString())
+        checkIfNewUser(user)
+    }
 
-        // Go to MainActivity
-        startMainActivity(user)
+    private fun checkIfNewUser(user: FirebaseUser?) {
+        databaseRef.child("users").child(user?.uid).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot?) {
+                onUserCheckData(user, snapshot?.exists())
+            }
+
+            override fun onCancelled(error: DatabaseError?) {
+                Log.e(TAG, "CheckIfNewUser error: $error")
+            }
+        })
+    }
+
+    private fun onUserCheckData(user: FirebaseUser?, exists: Boolean?) {
+        if(exists == false)
+            writeNewUser(user?.uid, user?.displayName, user?.email, user?.photoUrl.toString())
+
+        startTrainListActivity(user)
     }
 
     private fun writeNewUser(userId: String?, username: String?, email: String?, photoUrl: String?) {
@@ -174,9 +184,9 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         databaseRef.child("users").child(userId).setValue(user)
     }
 
-    private fun startMainActivity(user: FirebaseUser?) {
+    private fun startTrainListActivity(user: FirebaseUser?) {
         showSignOutButton()
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, TrainListActivity::class.java)
         intent.putExtra("id", user?.providerId)
         intent.putExtra("name", user?.displayName)
         startActivity(intent)

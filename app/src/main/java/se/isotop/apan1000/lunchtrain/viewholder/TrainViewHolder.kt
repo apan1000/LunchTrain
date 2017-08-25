@@ -1,10 +1,17 @@
 package se.isotop.apan1000.lunchtrain.viewholder
 
+import android.graphics.drawable.Drawable
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.bumptech.glide.Glide
+import com.bumptech.glide.GlideBuilder
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.train_list_item.view.*
@@ -23,6 +30,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     fun bindTrain(train: Train, trainKey: String) {
         with(train) {
+            itemView.train_image_loader.visibility = View.VISIBLE
+
             itemView.train_title.text = title
             itemView.train_description.text = description
             itemView.train_time.text = time
@@ -31,7 +40,21 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             if(imgUrl != "") {
                 Glide.with(itemView.context)
                         .load(imgUrl)
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                                itemView.train_image_loader.visibility = View.GONE
+                                return false
+                            }
+
+                            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                                itemView.train_image_loader.visibility = View.GONE
+                                return false
+                            }
+                        })
                         .into(itemView.train_image)
+            } else {
+                itemView.train_image_loader.visibility = View.GONE
+                itemView.train_image.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.food_train))
             }
         }
 
@@ -47,8 +70,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 showJoinButton()
             }
 
-            override fun onCancelled(p0: DatabaseError?) {
-                Log.i(TAG, "Get passengers: onCancelled")
+            override fun onCancelled(error: DatabaseError?) {
+                Log.e(TAG, "Get passengers canceled: $error")
                 Toast.makeText(itemView.context, "Network error: Could not get data about joined train", Toast.LENGTH_SHORT).show()
             }
         })
@@ -95,8 +118,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 }
             }
 
-            override fun onCancelled(p0: DatabaseError?) {
-
+            override fun onCancelled(error: DatabaseError?) {
+                Log.e(TAG, "userRef cancelled: $error")
             }
         })
     }
@@ -113,8 +136,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                     snapshot.ref?.setValue(count - 1)
                 }
 
-                override fun onCancelled(p0: DatabaseError?) {
-                    Log.d(TAG, "oldPassengerCountRef cancelled")
+                override fun onCancelled(error: DatabaseError?) {
+                    Log.e(TAG, "oldPassengerCountRef cancelled: $error")
                 }
             })
 
@@ -136,8 +159,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 snapshot.ref?.setValue(count + 1)
             }
 
-            override fun onCancelled(p0: DatabaseError?) {
-                Log.d(TAG, "trainRef cancelled")
+            override fun onCancelled(error: DatabaseError?) {
+                Log.e(TAG, "trainRef cancelled: $error")
             }
         })
         userRef.child("passengerAt").setValue(trainKey)

@@ -19,7 +19,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity">
+        <activity
+            android:name=".LoginActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,7 +32,22 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme" />
-        <activity android:name=".TrainDetailActivity"></activity>
+        <activity
+            android:name=".TrainListActivity"
+            android:label="@string/title_train_list"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTop">
+
+        </activity>
+        <activity
+            android:name=".TrainDetailActivity"
+            android:label="@string/title_train_detail"
+            android:parentActivityName=".TrainListActivity"
+            android:theme="@style/AppTheme.NoActionBar"> <!-- TODO: Fix transparent here maybe -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="se.isotop.apan1000.lunchtrain.TrainListActivity" />
+        </activity>
     </application>
 
 </manifest>

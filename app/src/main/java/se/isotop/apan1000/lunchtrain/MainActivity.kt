@@ -2,7 +2,6 @@ package se.isotop.apan1000.lunchtrain
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
@@ -11,7 +10,6 @@ import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.ProgressBar
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.firebase.ui.database.FirebaseRecyclerAdapter
@@ -32,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     lateinit private var databaseRef: DatabaseReference
 
     lateinit private var adapter: FirebaseRecyclerAdapter<Train, TrainViewHolder>
-    lateinit private var recycler: RecyclerView
+    lateinit private var recyclerView: RecyclerView
 
     lateinit private var loadingIndicator: ProgressBar
 
@@ -46,11 +44,11 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Started by $userName", Toast.LENGTH_SHORT).show()
         //
 
-        recycler = findViewById(R.id.recyclerview_trains)
-        recycler.setHasFixedSize(true)
+        recyclerView = findViewById(R.id.recyclerview_trains)
+        recyclerView.setHasFixedSize(true)
 
         val layoutManager =  LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recycler.layoutManager = layoutManager
+        recyclerView.layoutManager = layoutManager
 
         databaseRef = FirebaseDatabase.getInstance().reference
         val trainsQuery: Query = getQuery(databaseRef)
@@ -77,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        recycler.adapter = adapter
+        recyclerView.adapter = adapter
 
         loadingIndicator = findViewById(R.id.pb_loading_indicator)
         showLoading()
@@ -88,8 +86,6 @@ class MainActivity : AppCompatActivity() {
             writeNewTrain("Något ställe", "Vi går och käkar",
                     timeStamp, "http://i.huffpost.com/gen/4451422/images/o-FOOD-facebook.jpg",
                     0)
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
         }
     }
 
@@ -103,17 +99,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun writeNewTrain(title: String, description: String, time: String, imgUrl: String, passengerCount: Int) : Task<Void> {
-        // TODO: Fix
+        // TODO: Fix?
         val key = databaseRef.child("trains").push().key
         val train = Train(title, description, time, imgUrl)
-//        val train = HashMap<String, Any>()
-//        train.put("title", "Något ställe")
-//        train.put("description", "Vi går och käkar")
-//        train.put("time", "2017-08-30 11:15:00")
-//        train.put("imgUrl", "http://i.huffpost.com/gen/4451422/images/o-FOOD-facebook.jpg")
-//        train.put("passengerCount", 0)
-
-         val trainValues = train.toMap()
+        val trainValues = train.toMap()
 
         val childUpdates = HashMap<String, Any>()
         childUpdates.put("/trains/" + key, trainValues)
@@ -124,11 +113,11 @@ class MainActivity : AppCompatActivity() {
     private fun showTrainsView() {
         loadingIndicator.visibility = View.INVISIBLE
 
-        recycler.visibility = View.VISIBLE
+        recyclerView.visibility = View.VISIBLE
     }
 
     private fun showLoading() {
-        recycler.visibility = View.INVISIBLE
+        recyclerView.visibility = View.INVISIBLE
 
         loadingIndicator.visibility = View.VISIBLE
     }

@@ -31,6 +31,16 @@
             card_view:layout_constraintBottom_toTopOf="@+id/guideline_image_bottom"
             app:srcCompat="@drawable/food_train"/>
 
+        <ProgressBar
+            android:id="@+id/train_image_loader"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            app:layout_constraintLeft_toLeftOf="@id/train_image"
+            app:layout_constraintRight_toRightOf="@id/train_image"
+            app:layout_constraintTop_toTopOf="@id/train_image"
+            app:layout_constraintBottom_toBottomOf="@id/train_image"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/train_title"
             android:layout_width="match_parent"
