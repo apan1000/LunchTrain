@@ -152,15 +152,18 @@ class TrainListActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
-        R.id.action_settings -> {
-            startActivity(Intent(this, SettingsActivity::class.java))
-            true
-        }
-        R.id.action_sign_out -> {
-            signOut()
-            true
-        }
+        R.id.action_settings -> consume { navigateToSettings() }
+        R.id.action_sign_out -> consume { signOut() }
         else -> super.onOptionsItemSelected(item)
+    }
+
+    private fun navigateToSettings() {
+        startActivity(Intent(this, SettingsActivity::class.java))
+    }
+
+    private inline fun consume(f: () -> Unit): Boolean {
+        f()
+        return true
     }
 
     inner class TrainRecyclerAdapter(modelClass: Class<Train>,
