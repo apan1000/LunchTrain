@@ -59,6 +59,7 @@ class TrainDetailActivity : AppCompatActivity() {
                     intent.getStringExtra(TrainDetailFragment.ARG_ITEM_ID))
             arguments.putSerializable(TrainDetailFragment.ARG_MAP,
                     intent.getSerializableExtra(TrainDetailFragment.ARG_MAP))
+
             val fragment = TrainDetailFragment()
             fragment.arguments = arguments
             supportFragmentManager.beginTransaction()
@@ -70,38 +71,19 @@ class TrainDetailActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        // Make full transparent statusBar
+        // Make statusBar fully transparent
         if (Build.VERSION.SDK_INT >= 21) {
-            setWindowFlag(this, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, false)
             window.statusBarColor = Color.TRANSPARENT
-        } else if (Build.VERSION.SDK_INT >= 19) {
-            setWindowFlag(this, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, true)
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
     }
 
     override fun onStop() {
         super.onStop()
 
-        // Make full transparent statusBar
+        // Make statusBar solid
         if (Build.VERSION.SDK_INT >= 21) {
-            setWindowFlag(this, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, false)
             window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-        } else if (Build.VERSION.SDK_INT >= 19) {
-            setWindowFlag(this, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, false)
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         }
-    }
-
-    private fun setWindowFlag(activity: Activity, bits: Int, on: Boolean) {
-        val win = activity.window
-        val winParams = win.attributes
-        if (on) {
-            winParams.flags = winParams.flags or bits
-        } else {
-            winParams.flags = winParams.flags and bits.inv()
-        }
-        win.attributes = winParams
     }
 
     private fun signOut() {
