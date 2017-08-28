@@ -9,8 +9,10 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.GlideBuilder
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -38,6 +40,9 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             itemView.train_passenger_count.text = passengerCount.toString()
 
             if(imgUrl != "") {
+                val requestOptions = RequestOptions()
+                requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+
                 Glide.with(itemView.context)
                         .load(imgUrl)
                         .listener(object : RequestListener<Drawable> {
@@ -51,6 +56,7 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                                 return false
                             }
                         })
+                        .apply(requestOptions)
                         .into(itemView.train_image)
             } else {
                 itemView.train_image_loader.visibility = View.GONE
