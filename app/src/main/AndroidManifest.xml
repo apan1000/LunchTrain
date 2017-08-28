@@ -43,7 +43,7 @@
             android:name=".TrainDetailActivity"
             android:label="@string/title_train_detail"
             android:parentActivityName=".TrainListActivity"
-            android:theme="@style/AppTheme.NoActionBar"> <!-- TODO: Fix transparent here maybe -->
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="se.isotop.apan1000.lunchtrain.TrainListActivity" />

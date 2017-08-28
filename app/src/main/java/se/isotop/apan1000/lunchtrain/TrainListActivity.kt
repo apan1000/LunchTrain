@@ -6,25 +6,27 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.Snackbar
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.*
 import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
+import net.danlew.android.joda.JodaTimeAndroid
+import org.joda.time.DateTime
 
-
-import se.isotop.apan1000.lunchtrain.dummy.DummyContent
 import se.isotop.apan1000.lunchtrain.model.Train
 import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
 import java.io.Serializable
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
+import org.joda.time.DateTimeZone
+
+
 
 /**
  * An activity representing a list of Trains. This activity
@@ -60,11 +62,6 @@ class TrainListActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         toolbar.title = title
 
-        // Do something with the intent
-        val userName = intent.getStringExtra("name")
-        Toast.makeText(this, "Started by $userName", Toast.LENGTH_SHORT).show()
-        //
-
         recyclerView = findViewById(R.id.train_list)
         setupRecyclerView(recyclerView)
 
@@ -77,10 +74,17 @@ class TrainListActivity : AppCompatActivity() {
         }
 
         val fab = findViewById<View>(R.id.fab) as FloatingActionButton
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date())
+
+        JodaTimeAndroid.init(this);
+        val zone = DateTimeZone.forID("Europe/Stockholm")
+        DateTimeZone.setDefault(zone)
+
+        val timeStamp = DateTime.now().withTimeAtStartOfDay().toString()
+
+//        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date())
 
         fab.setOnClickListener { view ->
-            writeNewTrain("Något ställe", "Vi går och käkar",
+            writeNewTrain("Ett café", "Äta?",
                     timeStamp, "",
                     0)
         }
@@ -133,14 +137,18 @@ class TrainListActivity : AppCompatActivity() {
     private fun getQuery(databaseReference: DatabaseReference): Query {
         // Last 100 posts, these are automatically the 100 most recent
         // due to sorting by push() keys
+        val timeStamp = DateTime.now().withTimeAtStartOfDay().toString()
+        Log.e(TAG, "Timestamp: $timeStamp")
         return databaseReference.child("trains")
+                .orderByChild("time")
+                .startAt(timeStamp)
                 .limitToFirst(100)
     }
 
     private fun signOut() {
         // Start LoginActivity, tell it to sign out
         val intent = Intent(this, LoginActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.putExtra("signout", true)
         startActivity(intent)
     }

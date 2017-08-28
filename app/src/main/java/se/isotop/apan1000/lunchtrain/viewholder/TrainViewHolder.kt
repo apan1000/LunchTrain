@@ -17,6 +17,8 @@ import com.bumptech.glide.request.target.Target
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.train_list_item.view.*
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import se.isotop.apan1000.lunchtrain.R
 import se.isotop.apan1000.lunchtrain.model.Train
 
@@ -34,9 +36,12 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         with(train) {
             itemView.train_image_loader.visibility = View.VISIBLE
 
+            val fmt = DateTimeFormat.forPattern("HH:mm")
+            val shortTime = fmt.print(DateTime(time))
+
             itemView.train_title.text = title
             itemView.train_description.text = description
-            itemView.train_time.text = time
+            itemView.train_time.text = shortTime
             itemView.train_passenger_count.text = passengerCount.toString()
 
             if(imgUrl != "") {

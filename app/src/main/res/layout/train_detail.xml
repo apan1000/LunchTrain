@@ -1,9 +1,62 @@
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/train_detail"
-    style="?android:attr/textAppearanceLarge"
-    android:layout_width="match_parent"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:textIsSelectable="true"
-    tools:context="se.isotop.apan1000.lunchtrain.TrainDetailFragment" />
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/info_linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:paddingStart="6dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:srcCompat="@drawable/ic_access_time_black_24dp"/>
+
+        <TextView
+            android:id="@+id/detail_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"
+            android:textSize="@dimen/card_time"
+            tools:text="11:30" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="6dp"
+            app:srcCompat="@drawable/ic_person_black_24dp"/>
+
+        <TextView
+            android:id="@+id/detail_passenger_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"
+            android:textSize="@dimen/card_time"
+            tools:text="14"/>
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <TextView
+        android:id="@+id/detail_description"
+        style="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/info_linearLayout"
+        android:padding="16dp"
+        android:textIsSelectable="true"
+        tools:context="se.isotop.apan1000.lunchtrain.TrainDetailFragment" />
+
+</android.support.constraint.ConstraintLayout>

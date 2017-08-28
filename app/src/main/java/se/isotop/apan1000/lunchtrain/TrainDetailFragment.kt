@@ -7,9 +7,20 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import kotlinx.android.synthetic.main.activity_train_detail.*
+import kotlinx.android.synthetic.main.activity_train_detail.view.*
+import kotlinx.android.synthetic.main.train_detail.view.*
+import org.joda.time.DateTime
+import org.joda.time.DateTimeUtils
+import org.joda.time.format.DateTimeFormat
 
 import se.isotop.apan1000.lunchtrain.dummy.DummyContent
+import java.time.format.DateTimeFormatter
 
 /**
  * A fragment representing a single Train detail screen.
@@ -24,6 +35,8 @@ import se.isotop.apan1000.lunchtrain.dummy.DummyContent
 class TrainDetailFragment : Fragment() {
 
     lateinit var trainMap: Map<*, *>
+    lateinit var root: View
+    lateinit var parentActivity: Activity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,21 +46,42 @@ class TrainDetailFragment : Fragment() {
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
 
-            val activity = this.activity
-            val appBarLayout = activity.findViewById<View>(R.id.toolbar_layout) as CollapsingToolbarLayout
+            parentActivity = this.activity
+            val appBarLayout = parentActivity.toolbar_layout
 
             trainMap = arguments.getSerializable(ARG_MAP) as Map<*, *>
             appBarLayout.title = trainMap["title"] as String
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater?.inflate(R.layout.train_detail, container, false)
+        root = inflater.inflate(R.layout.train_detail, container, false)
 
-        (rootView?.findViewById<TextView>(R.id.train_detail) as TextView).text = trainMap["description"] as String
+        val timeString = trainMap["time"] as String
+        val fmt = DateTimeFormat.forPattern("HH:mm")
+        val time = fmt.print(DateTime(timeString))
 
-        return rootView
+        root.detail_description.text = trainMap["description"] as String
+        root.detail_time.text = time
+        root.detail_passenger_count.text = (trainMap["passengerCount"] as Int).toString()
+
+        if(trainMap["imgUrl"] as String != "")
+            loadImage()
+
+        return root
+    }
+
+    private fun loadImage() {
+        val imageView = parentActivity.detail_image
+
+        val requestOptions = RequestOptions()
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+
+        Glide.with(parentActivity)
+                .load(trainMap["imgUrl"] as String)
+                .apply(requestOptions)
+                .into(imageView)
     }
 
     companion object {

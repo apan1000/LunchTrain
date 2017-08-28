@@ -24,7 +24,7 @@
             app:toolbarId="@+id/toolbar">
 
             <ImageView
-                android:id="@+id/main.backdrop"
+                android:id="@+id/detail_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
@@ -33,6 +33,14 @@
                 app:layout_collapseMode="parallax"
                 tools:ignore="ContentDescription"
                 />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                android:background="@drawable/dark_gradient_bg"
+                app:layout_collapseMode="parallax">
+            </FrameLayout>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/detail_toolbar"
