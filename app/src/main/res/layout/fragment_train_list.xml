@@ -2,9 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="se.isotop.apan1000.lunchtrain.fragments.TrainListFragment">
 
-    <!-- TODO: Update fragment layout -->
-    <include layout="@layout/content_main" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/train_list"
+        android:name="se.isotop.apan1000.lunchtrain.TrainListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="LinearLayoutManager"
+        tools:context="se.isotop.apan1000.lunchtrain.TrainListActivity"
+        tools:listitem="@layout/train_list_item" />
 
 </FrameLayout>
