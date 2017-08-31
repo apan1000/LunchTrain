@@ -3,6 +3,7 @@
 
     <dimen name="activity_margin_vertical">16dp</dimen>
 
+    <!-- Card -->
     <dimen name="card_image_height">220dp</dimen>
 
     <dimen name="card_title_padding">6dp</dimen>
@@ -17,9 +18,12 @@
     <dimen name="card_margin_vertical">12dp</dimen>
     <dimen name="card_margin_horizontal">16dp</dimen>
 
+    <!-- Login -->
     <dimen name="login_title_text_size">40sp</dimen>
     <dimen name="login_text_size">16sp</dimen>
+
+
     <dimen name="app_bar_height">200dp</dimen>
-    <dimen name="item_width">200dp</dimen>
+    <dimen name="train_list_width">400dp</dimen>
     <dimen name="text_margin">16dp</dimen>
 </resources>
