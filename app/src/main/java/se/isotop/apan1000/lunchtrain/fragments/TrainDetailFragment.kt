@@ -1,4 +1,4 @@
-package se.isotop.apan1000.lunchtrain
+package se.isotop.apan1000.lunchtrain.fragments
 
 import android.app.Activity
 import android.os.Bundle
@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_train_detail.*
 import kotlinx.android.synthetic.main.train_detail.view.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import se.isotop.apan1000.lunchtrain.R
 import java.io.Serializable
 
 /**

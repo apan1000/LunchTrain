@@ -13,6 +13,8 @@ import com.google.firebase.database.DatabaseReference
 import net.danlew.android.joda.JodaTimeAndroid
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
+import se.isotop.apan1000.lunchtrain.fragments.CreateTrainFragment
+import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
 import se.isotop.apan1000.lunchtrain.fragments.TrainListFragment
 import se.isotop.apan1000.lunchtrain.model.Train
 import java.io.Serializable
@@ -80,7 +82,6 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
     }
 
     override fun onTrainSelected(view: View, model: Train, position: Int) {
-        // TODO:
         if (twoPane) {
             val fragment = TrainDetailFragment
                     .newInstance(position.toString(), model.toMap() as Serializable)
