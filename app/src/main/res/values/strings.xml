@@ -5,6 +5,10 @@
 
     <string name="welcome_message">Welcome to Lunch Train!\nChew! Chew!</string>
 
+    <string name="label_title">Title</string>
+    <string name="label_description">Description</string>
+    <string name="label_img_url">Image URL (optional)</string>
+
     <string name="test_description">Test Description Test Description Test Description Test Description Test Description Test Description</string>
 
     <!-- Sign-in status messages -->
@@ -97,7 +101,7 @@
     <string name="pref_title_vibrate">Vibrate</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_train_list">Trains</string>
     <string name="title_train_detail">Train Detail</string>
+    <string name="title_activity_create_train">CreateTrainActivity</string>
 </resources>

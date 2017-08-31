@@ -13,7 +13,6 @@ import com.google.firebase.database.DatabaseReference
 import net.danlew.android.joda.JodaTimeAndroid
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
-import se.isotop.apan1000.lunchtrain.fragments.CreateTrainFragment
 import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
 import se.isotop.apan1000.lunchtrain.fragments.TrainListFragment
 import se.isotop.apan1000.lunchtrain.model.Train
@@ -38,8 +37,6 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
     private var twoPane: Boolean = false
 
     private val TAG = "TrainListActivity"
-
-    lateinit private var databaseRef: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,9 +72,7 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
 
         val fab = findViewById<FloatingActionButton>(R.id.add_train_fab)
         fab.setOnClickListener { view ->
-            writeNewTrain("Ett café", "Äta?",
-                    timeStamp, "",
-                    0)
+            createTrain()
         }
     }
 
@@ -98,16 +93,19 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         }
     }
 
-    private fun writeNewTrain(title: String, description: String, time: String, imgUrl: String, passengerCount: Int) : Task<Void> {
-        // TODO: Move to approptiate location
-        val key = databaseRef.child("trains").push().key
-        val train = Train(title, description, time, imgUrl)
-        val trainValues = train.toMap()
-
-        val childUpdates = HashMap<String, Any>()
-        childUpdates.put("/trains/" + key, trainValues)
-
-        return databaseRef.updateChildren(childUpdates)
+    private fun createTrain() {
+        // TODO: Change to CreateTrain
+        if (twoPane) {
+            val fragment = CreateTrainFragment
+                    .newInstance()
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.train_detail_container, fragment)
+                    .commit()
+        } else {
+            val context = baseContext
+            val intent = Intent(context, CreateTrainActivity::class.java)
+            context.startActivity(intent)
+        }
     }
 
     private fun signOut() {
