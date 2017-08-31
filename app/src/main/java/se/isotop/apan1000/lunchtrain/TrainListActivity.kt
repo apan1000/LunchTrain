@@ -2,30 +2,21 @@ package se.isotop.apan1000.lunchtrain
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
 import android.support.design.widget.FloatingActionButton
-import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
-import android.view.*
-import android.widget.ProgressBar
-import com.firebase.ui.database.FirebaseRecyclerAdapter
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.Query
 import net.danlew.android.joda.JodaTimeAndroid
 import org.joda.time.DateTime
-
-import se.isotop.apan1000.lunchtrain.model.Train
-import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
-import java.io.Serializable
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
-import java.util.*
 import org.joda.time.DateTimeZone
-
+import se.isotop.apan1000.lunchtrain.fragments.TrainListFragment
+import se.isotop.apan1000.lunchtrain.model.Train
+import java.io.Serializable
+import java.util.*
 
 
 /**
@@ -36,9 +27,8 @@ import org.joda.time.DateTimeZone
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-class TrainListActivity : AppCompatActivity() {
+class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteractionListener {
 
-    // TODO: Merge MainActivity into this class
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -49,21 +39,13 @@ class TrainListActivity : AppCompatActivity() {
 
     lateinit private var databaseRef: DatabaseReference
 
-    lateinit private var adapter: FirebaseRecyclerAdapter<Train, TrainViewHolder>
-    lateinit private var recyclerView: RecyclerView
-
-    lateinit private var loadingIndicator: ProgressBar
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_train_list)
 
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         toolbar.title = title
-
-        recyclerView = findViewById(R.id.train_list)
-        setupRecyclerView(recyclerView)
 
         if (findViewById<View>(R.id.train_detail_container) != null) {
             // The detail container view will be present only in the
@@ -73,45 +55,50 @@ class TrainListActivity : AppCompatActivity() {
             twoPane = true
         }
 
-        val fab = findViewById<View>(R.id.fab) as FloatingActionButton
+        if (savedInstanceState == null) {
+            // Create the detail fragment and add it to the activity
+            // using a fragment transaction.
+            val fragment = TrainListFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.train_list_container, fragment)
+                    .commit()
+        }
 
+        // Setup timestamp
         JodaTimeAndroid.init(this);
         val zone = DateTimeZone.forID("Europe/Stockholm")
         DateTimeZone.setDefault(zone)
 
-        val timeStamp = DateTime.now().withTimeAtStartOfDay().toString()
+        val timeStamp = DateTime.now().toString()
 
-//        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date())
-
+        val fab = findViewById<FloatingActionButton>(R.id.add_train_fab)
         fab.setOnClickListener { view ->
             writeNewTrain("Ett café", "Äta?",
                     timeStamp, "",
                     0)
         }
-
-        loadingIndicator = findViewById(R.id.pb_loading_indicator)
-        showLoading()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        adapter.cleanup()
-    }
+    override fun onTrainSelected(view: View, model: Train, position: Int) {
+        // TODO:
+        if (twoPane) {
+            val fragment = TrainDetailFragment
+                    .newInstance(position.toString(), model.toMap() as Serializable)
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.train_detail_container, fragment)
+                    .commit()
+        } else {
+            val context = view.context
+            val intent = Intent(context, TrainDetailActivity::class.java)
+            intent.putExtra(TrainDetailFragment.ARG_ITEM_ID, position.toString())
+            intent.putExtra(TrainDetailFragment.ARG_MAP, model.toMap() as Serializable)
 
-    private fun setupRecyclerView(recyclerView: RecyclerView) {
-        val layoutManager =  LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView.layoutManager = layoutManager
-
-        databaseRef = FirebaseDatabase.getInstance().reference
-        val trainsQuery: Query = getQuery(databaseRef)
-
-        adapter = TrainRecyclerAdapter(Train::class.java, R.layout.train_list_item,
-                TrainViewHolder::class.java, trainsQuery)
-        recyclerView.adapter = adapter
+            context.startActivity(intent)
+        }
     }
 
     private fun writeNewTrain(title: String, description: String, time: String, imgUrl: String, passengerCount: Int) : Task<Void> {
-        // TODO: Fix?
+        // TODO: Move to approptiate location
         val key = databaseRef.child("trains").push().key
         val train = Train(title, description, time, imgUrl)
         val trainValues = train.toMap()
@@ -120,29 +107,6 @@ class TrainListActivity : AppCompatActivity() {
         childUpdates.put("/trains/" + key, trainValues)
 
         return databaseRef.updateChildren(childUpdates)
-    }
-
-    private fun showTrainsView() {
-        loadingIndicator.visibility = View.INVISIBLE
-
-        recyclerView.visibility = View.VISIBLE
-    }
-
-    private fun showLoading() {
-        recyclerView.visibility = View.INVISIBLE
-
-        loadingIndicator.visibility = View.VISIBLE
-    }
-
-    private fun getQuery(databaseReference: DatabaseReference): Query {
-        // Last 100 posts, these are automatically the 100 most recent
-        // due to sorting by push() keys
-        val timeStamp = DateTime.now().withTimeAtStartOfDay().toString()
-        Log.e(TAG, "Timestamp: $timeStamp")
-        return databaseReference.child("trains")
-                .orderByChild("time")
-                .startAt(timeStamp)
-                .limitToFirst(100)
     }
 
     private fun signOut() {
@@ -172,44 +136,5 @@ class TrainListActivity : AppCompatActivity() {
     private inline fun consume(f: () -> Unit): Boolean {
         f()
         return true
-    }
-
-    inner class TrainRecyclerAdapter(modelClass: Class<Train>,
-                                     modelLayout: Int,
-                                     viewHolderClass: Class<TrainViewHolder>,
-                                     query: Query)
-        : FirebaseRecyclerAdapter<Train, TrainViewHolder>(modelClass,modelLayout, viewHolderClass, query) {
-
-        override fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
-            val trainRef = getRef(position)
-
-            // Set click listener for the whole train view
-            val trainKey = trainRef.key
-            viewHolder.itemView.setOnClickListener { v ->
-                if (twoPane) {
-                    val arguments = Bundle()
-                    arguments.putString(TrainDetailFragment.ARG_ITEM_ID, position.toString())
-                    arguments.putSerializable(TrainDetailFragment.ARG_MAP, model.toMap() as Serializable)
-                    val fragment = TrainDetailFragment()
-                    fragment.arguments = arguments
-                    supportFragmentManager.beginTransaction()
-                            .replace(R.id.train_detail_container, fragment)
-                            .commit()
-                } else {
-                    val context = v.context
-                    val intent = Intent(context, TrainDetailActivity::class.java)
-                    intent.putExtra(TrainDetailFragment.ARG_ITEM_ID, position.toString())
-                    intent.putExtra(TrainDetailFragment.ARG_MAP, model.toMap() as Serializable)
-
-                    context.startActivity(intent)
-                }
-            }
-
-            // Bind Train to ViewHolder
-            viewHolder.bindTrain(model, trainKey)
-
-            showTrainsView()
-        }
-
     }
 }

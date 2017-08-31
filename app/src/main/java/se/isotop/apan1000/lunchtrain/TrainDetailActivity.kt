@@ -29,8 +29,9 @@ class TrainDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_train_detail)
-        val toolbar = findViewById<View>(R.id.detail_toolbar) as Toolbar
-        setSupportActionBar(toolbar)
+        val toolbar = findViewById<Toolbar>(R.id.detail_toolbar)
+        if(toolbar != null)
+            setSupportActionBar(toolbar)
 
         val fab = findViewById<View>(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
@@ -54,14 +55,9 @@ class TrainDetailActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
-            val arguments = Bundle()
-            arguments.putString(TrainDetailFragment.ARG_ITEM_ID,
-                    intent.getStringExtra(TrainDetailFragment.ARG_ITEM_ID))
-            arguments.putSerializable(TrainDetailFragment.ARG_MAP,
-                    intent.getSerializableExtra(TrainDetailFragment.ARG_MAP))
-
-            val fragment = TrainDetailFragment()
-            fragment.arguments = arguments
+            val itemId = intent.getStringExtra(TrainDetailFragment.ARG_ITEM_ID)
+            val trainMap = intent.getSerializableExtra(TrainDetailFragment.ARG_MAP)
+            val fragment = TrainDetailFragment.newInstance(itemId, trainMap)
             supportFragmentManager.beginTransaction()
                     .add(R.id.train_detail_container, fragment)
                     .commit()
