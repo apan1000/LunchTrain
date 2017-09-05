@@ -1,82 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="se.isotop.apan1000.lunchtrain.LoginActivity">
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/login_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
 
-    <TextView
-        android:text="@string/app_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_top"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:gravity="center"
-        android:textSize="@dimen/login_title_text_size"
-        />
+        <TextView
+            android:text="@string/app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_top"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:gravity="center"
+            android:textSize="@dimen/login_title_text_size"
+            />
 
-    <TextView
-        android:text="@string/welcome_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/sign_in_guideline_top"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:gravity="center"
-        android:layout_marginTop="0dp"
-        android:textSize="@dimen/login_text_size"
-        />
+        <TextView
+            android:text="@string/welcome_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/sign_in_guideline_top"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:gravity="center"
+            android:layout_marginTop="0dp"
+            android:textSize="@dimen/login_text_size"
+            />
 
-    <ProgressBar
-        android:id="@+id/login_loading_indicator"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_bottom"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:visibility="invisible" />
+        <ProgressBar
+            android:id="@+id/login_loading_indicator"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_bottom"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:visibility="invisible" />
 
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:buttonSize="standard"
-        app:colorScheme="auto"
-        app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_bottom"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:visibility="visible"
-        />
-    
-    <Button
-        android:id="@+id/sign_out_button"
-        android:text="@string/action_sign_out"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_bottom"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:padding="16dp"
-        android:foreground="@drawable/ripple"
-        android:background="@color/colorAccent"
-        android:textColor="@color/white"
-        android:visibility="invisible"/>
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:buttonSize="standard"
+            app:colorScheme="auto"
+            app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_bottom"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:visibility="visible"
+            />
 
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/sign_in_guideline_top"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.25"/>
+        <Button
+            android:id="@+id/sign_out_button"
+            android:text="@string/action_sign_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/sign_in_guideline_bottom"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:padding="16dp"
+            android:foreground="@drawable/ripple"
+            android:background="@color/colorAccent"
+            android:textColor="@color/white"
+            android:visibility="invisible"/>
 
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/sign_in_guideline_bottom"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.75"/>
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sign_in_guideline_top"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.25"/>
 
-</android.support.constraint.ConstraintLayout>
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sign_in_guideline_bottom"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.75"/>
+
+    </android.support.constraint.ConstraintLayout>
+</android.support.design.widget.CoordinatorLayout>

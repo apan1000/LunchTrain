@@ -21,6 +21,7 @@ import android.widget.ProgressBar
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_login.*
 
 
 class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -44,8 +45,6 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
                 .requestEmail()
                 .build()
 
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
         googleApiClient = GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -57,13 +56,13 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
 
         setContentView(R.layout.activity_login)
 
-        loadingIndicator = findViewById(R.id.login_loading_indicator)
+        loadingIndicator = login_loading_indicator
 
-        signInButton = findViewById(R.id.sign_in_button)
+        signInButton = sign_in_button
         signInButton.setSize(SignInButton.SIZE_WIDE)
         signInButton.setOnClickListener(this)
 
-        signOutButton = findViewById(R.id.sign_out_button)
+        signOutButton = sign_out_button
         signOutButton.setOnClickListener(this)
     }
 
@@ -74,6 +73,7 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         val shouldSignOut = intent.getBooleanExtra("signout", false)
         if(shouldSignOut) {
             signOut()
+            intent.putExtra("signout", false)
         }
 
         if(auth.currentUser != null) {
@@ -92,9 +92,10 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     private fun signOut() {
         showSignInButton()
         auth.signOut()
+
         // Google sign out
         AuthUI.getInstance().signOut(this).addOnCompleteListener {
-            // do something here
+            Snackbar.make(login_container, getString(R.string.signed_out), Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -121,8 +122,6 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
             val account: GoogleSignInAccount? = result.signInAccount
             firebaseAuthWithGoogle(account)
         } else {
-            Toast.makeText(this, R.string.signed_in_err, Toast.LENGTH_LONG)
-                    .show()
             showSignInButton()
         }
     }
@@ -136,16 +135,14 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
                     val user = auth.currentUser
 
                     onAuthSuccess(user)
                 } else {
-                    // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
-                    Toast.makeText(this, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show()
+                    Snackbar.make(login_container, "Authentication failed.",
+                            Snackbar.LENGTH_LONG).show()
                     showSignInButton()
                 }
             }
@@ -214,7 +211,7 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     }
 
     override fun onConnectionFailed(result: ConnectionResult) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Snackbar.make(window.decorView, result.errorMessage.toString(), Snackbar.LENGTH_LONG)
     }
 
     override fun onClick(view: View?) {
