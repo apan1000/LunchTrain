@@ -31,4 +31,9 @@
         <item name="colorControlHighlight">@color/white</item>
     </style>
 
+    <style name="SubmitTrainButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:background">@drawable/btn_train_submit</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
 </resources>

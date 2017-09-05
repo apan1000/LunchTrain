@@ -18,6 +18,7 @@ import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.train_list_item.view.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import se.isotop.apan1000.lunchtrain.FirebaseManager
 import se.isotop.apan1000.lunchtrain.R
 import se.isotop.apan1000.lunchtrain.model.Train
 
@@ -115,16 +116,13 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 val passengerAt = snapshot.child("passengerAt").value as String
 
                 if(passengerAt == trainKey) {
-                    // Leave train
                     Log.d(TAG, "Same train :) ${snapshot.child("passengerAt").value}")
-                    leaveOldTrain(passengerAt)
+                    FirebaseManager.leaveTrain(passengerAt)
                 } else {
-                    // Change to clicked train
                     Log.d(TAG, "Other train :O $trainKey")
 
-                    leaveOldTrain(passengerAt)
-
-                    joinNewTrain(trainKey)
+                    FirebaseManager.leaveTrain(passengerAt)
+                    FirebaseManager.joinTrain(trainKey)
                 }
             }
 
@@ -132,48 +130,5 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 Log.e(TAG, "userRef cancelled: $error")
             }
         })
-    }
-
-    private fun leaveOldTrain(passengerAt: String) {
-        if(passengerAt != "") {
-            val userRef : DatabaseReference = databaseRef.child("users").child(getUid())
-            val oldPassengerCountRef: DatabaseReference = databaseRef.child("trains").child(passengerAt).child("passengerCount")
-            val oldPassengersRef: DatabaseReference = databaseRef.child("passengers").child(passengerAt)
-
-            oldPassengerCountRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot?) {
-                    val count = snapshot?.value as Long
-                    snapshot.ref?.setValue(count - 1)
-                }
-
-                override fun onCancelled(error: DatabaseError?) {
-                    Log.e(TAG, "oldPassengerCountRef cancelled: $error")
-                }
-            })
-
-            userRef.child("passengerAt").setValue("")
-            oldPassengersRef.child(getUid()).removeValue()
-        }
-    }
-
-    private fun joinNewTrain(trainKey: String) {
-        val userId = getUid()
-
-        val userRef : DatabaseReference = databaseRef.child("users").child(userId)
-        val trainRef: DatabaseReference = databaseRef.child("trains").child(trainKey)
-        val passengersRef: DatabaseReference = databaseRef.child("passengers").child(trainKey)
-
-        trainRef.child("passengerCount").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot?) {
-                val count = snapshot?.value as Long
-                snapshot.ref?.setValue(count + 1)
-            }
-
-            override fun onCancelled(error: DatabaseError?) {
-                Log.e(TAG, "trainRef cancelled: $error")
-            }
-        })
-        userRef.child("passengerAt").setValue(trainKey)
-        passengersRef.child(userId).setValue(true)
     }
 }

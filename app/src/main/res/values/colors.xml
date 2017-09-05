@@ -6,6 +6,8 @@
 
     <color name="card_title_background">#99E91E63</color>
 
+    <color name="btn_submit_train_disabled">@color/teal_200</color>
+
     <!-- Material design colors -->
     <!-- Red -->
     <color name="red_50">#FFEBEE</color>

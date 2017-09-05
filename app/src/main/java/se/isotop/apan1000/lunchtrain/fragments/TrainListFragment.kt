@@ -61,7 +61,6 @@ class TrainListFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
         root = inflater!!.inflate(R.layout.fragment_train_list, container, false)
 
         recyclerView = root.train_list
@@ -91,8 +90,6 @@ class TrainListFragment : Fragment() {
     }
 
     private fun getQuery(databaseReference: DatabaseReference): Query {
-        // Last 100 posts, these are automatically the 100 most recent
-        // due to sorting by push() keys
         val timeStamp = DateTime.now().withTimeAtStartOfDay().toString()
         Log.e(TAG, "Timestamp: $timeStamp")
         return databaseReference.child("trains")
@@ -112,13 +109,6 @@ class TrainListFragment : Fragment() {
 
         loadingIndicator.visibility = View.VISIBLE
     }
-
-    // TODO: Rename method, update argument and hook method into UI event
-//    fun onButtonPressed(view: View, model: Train, position: Int) {
-//        if (listener != null) {
-//            listener!!.onTrainSelected(view, model, position)
-//        }
-//    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -169,23 +159,15 @@ class TrainListFragment : Fragment() {
     }
 
     companion object {
-//        private val ARG_PARAM1 = "param1"
-//        private val ARG_PARAM2 = "param2"
 
         /**
          * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
+         * this fragment.
          *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
          * @return A new instance of fragment TrainListFragment.
          */
         fun newInstance(): TrainListFragment {
             val fragment = TrainListFragment()
-//            val args = Bundle()
-//            args.putString(ARG_PARAM1, param1)
-//            args.putString(ARG_PARAM2, param2)
-//            fragment.arguments = args
             return fragment
         }
     }

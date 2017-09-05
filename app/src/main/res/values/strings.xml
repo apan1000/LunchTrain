@@ -1,13 +1,17 @@
 <resources>
     <string name="app_name">Lunch Train</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_sign_out">Sign out</string>
 
     <string name="welcome_message">Welcome to Lunch Train!\nChew! Chew!</string>
 
+    <string name="action_settings">Settings</string>
+    <string name="action_sign_out">Sign out</string>
+
+    <!-- Create Train -->
     <string name="label_title">Title</string>
     <string name="label_description">Description</string>
     <string name="label_img_url">Image URL (optional)</string>
+    <string name="action_submit_train">Chew! Chew!</string>
+    <string name="time_text">%1$02d:%2$02d</string>
 
     <string name="test_description">Test Description Test Description Test Description Test Description Test Description Test Description</string>
 
