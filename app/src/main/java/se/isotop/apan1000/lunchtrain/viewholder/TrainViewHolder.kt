@@ -44,6 +44,13 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             itemView.train_time.text = shortTime
             itemView.train_passenger_count.text = passengerCount.toString()
 
+            if (passengers.containsKey(getUid())) {
+                itemView.join_button.setImageResource(R.drawable.ic_check_circle_light_blue_24dp)
+            } else {
+                itemView.join_button.setImageResource(R.drawable.ic_check_circle_grey_24dp)
+            }
+            showJoinButton()
+
             if(imgUrl != "") {
                 val requestOptions = RequestOptions()
                 requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -68,24 +75,6 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 itemView.train_image.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.food_train))
             }
         }
-
-        showLoadingJoinButton()
-        databaseRef.child("passengers").child(trainKey).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // Determine if the current user has joined this train and set UI accordingly
-                if (snapshot.hasChild(getUid())) {
-                    itemView.join_button.setImageResource(R.drawable.ic_check_circle_light_blue_24dp)
-                } else {
-                    itemView.join_button.setImageResource(R.drawable.ic_check_circle_grey_24dp)
-                }
-                showJoinButton()
-            }
-
-            override fun onCancelled(error: DatabaseError?) {
-                Log.e(TAG, "Get passengers canceled: $error")
-                Toast.makeText(itemView.context, "Network error: Could not get data about joined train", Toast.LENGTH_SHORT).show()
-            }
-        })
 
         itemView.join_button.setOnClickListener { onJoinClicked(trainKey) }
     }

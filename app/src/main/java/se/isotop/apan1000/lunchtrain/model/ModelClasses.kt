@@ -16,7 +16,7 @@ data class Train(var title: String = "",
                  var time: String = "",
                  var imgUrl: String = "",
                  var passengerCount: Int = 0,
-                 var passengers: List<String> = mutableListOf(),
+                 var passengers: MutableMap<String, Any> = mutableMapOf(),
                  val uid: String = "") {
 
     fun toMap() : Map<String, Any> {

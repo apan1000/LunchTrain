@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.os.Build
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
+import kotlinx.android.synthetic.main.activity_train_detail.*
 import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
 
 
@@ -26,19 +27,18 @@ class TrainDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_train_detail)
-        val toolbar = findViewById<Toolbar>(R.id.detail_toolbar)
+        val toolbar = detail_toolbar
         if(toolbar != null)
             setSupportActionBar(toolbar)
 
-        val fab = findViewById<View>(R.id.fab) as FloatingActionButton
+        val fab = fab as FloatingActionButton
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
 
         // Show the Up button in the action bar.
-        val actionBar = supportActionBar
-        actionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -95,12 +95,6 @@ class TrainDetailActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when(item.itemId) {
         android.R.id.home -> {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
             navigateUpTo(Intent(this, TrainListActivity::class.java))
             true
         }

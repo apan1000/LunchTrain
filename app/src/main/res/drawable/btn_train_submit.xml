@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape>
+            <solid android:color="@color/btn_submit_train_disabled"/>
+        </shape>
+    </item>
+
+    <item>
+        <ripple xmlns:android="http://schemas.android.com/apk/res/android"
+            android:color="?attr/colorControlHighlight">
+            <item android:drawable="?attr/colorPrimary"/>
+        </ripple>
+    </item>
+</selector>

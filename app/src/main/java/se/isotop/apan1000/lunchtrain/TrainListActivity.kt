@@ -8,8 +8,6 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import com.google.android.gms.tasks.Task
-import com.google.firebase.database.DatabaseReference
 import net.danlew.android.joda.JodaTimeAndroid
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
@@ -17,7 +15,6 @@ import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
 import se.isotop.apan1000.lunchtrain.fragments.TrainListFragment
 import se.isotop.apan1000.lunchtrain.model.Train
 import java.io.Serializable
-import java.util.*
 
 
 /**
@@ -28,7 +25,8 @@ import java.util.*
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteractionListener {
+class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteractionListener,
+        CreateTrainFragment.OnCreateTrainInteractionListener {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -55,8 +53,6 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         }
 
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
             val fragment = TrainListFragment.newInstance()
             supportFragmentManager.beginTransaction()
                     .add(R.id.train_list_container, fragment)
@@ -68,11 +64,12 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         val zone = DateTimeZone.forID("Europe/Stockholm")
         DateTimeZone.setDefault(zone)
 
-        val timeStamp = DateTime.now().toString()
+        val timeStamp = DateTime.now()
+        timeStamp.withHourOfDay(2)
 
         val fab = findViewById<FloatingActionButton>(R.id.add_train_fab)
         fab.setOnClickListener { view ->
-            createTrain()
+            startCreateTrain()
         }
     }
 
@@ -93,8 +90,7 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         }
     }
 
-    private fun createTrain() {
-        // TODO: Change to CreateTrain
+    private fun startCreateTrain() {
         if (twoPane) {
             val fragment = CreateTrainFragment
                     .newInstance()
@@ -108,6 +104,10 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         }
     }
 
+    override fun onCreateTrain(train: Train) {
+        FirebaseManager.writeNewTrain(train)
+    }
+
     private fun signOut() {
         // Start LoginActivity, tell it to sign out
         val intent = Intent(this, LoginActivity::class.java)
@@ -117,7 +117,6 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
