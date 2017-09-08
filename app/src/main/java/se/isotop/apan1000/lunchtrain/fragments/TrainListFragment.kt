@@ -55,8 +55,6 @@ class TrainListFragment : Fragment() {
         if (arguments != null) {
 
         }
-
-
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
@@ -133,7 +131,7 @@ class TrainListFragment : Fragment() {
      * See the Android Training lesson [Communicating with Other Fragments](http://developer.android.com/training/basics/fragments/communicating.html) for more information.
      */
     interface OnTrainInteractionListener {
-        fun onTrainSelected(view: View, model: Train, position: Int)
+        fun onTrainSelected(context: Context, trainMap: MutableMap<String, Any>, position: Int)
     }
 
     inner class TrainRecyclerAdapter(modelClass: Class<Train>,
@@ -148,7 +146,7 @@ class TrainListFragment : Fragment() {
             // Set click listener for the whole train view
             val trainKey = trainRef.key
             viewHolder.itemView.setOnClickListener { v ->
-                listener?.onTrainSelected(v, model, position)
+                listener?.onTrainSelected(v.context, model.toMap(), position)
             }
 
             viewHolder.bindTrain(model, trainKey)

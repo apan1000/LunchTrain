@@ -12,7 +12,7 @@
         <activity
             android:name=".TrainListActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAINACTIVITY" />
@@ -22,7 +22,8 @@
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTask"
+            android:theme="@style/LoginTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,6 +33,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".TrainDetailActivity"
@@ -45,7 +47,12 @@
         <activity
             android:name=".CreateTrainActivity"
             android:label="@string/title_activity_create_train"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="se.isotop.apan1000.lunchtrain.TrainListActivity" />
+        </activity>
     </application>
 
 </manifest>
