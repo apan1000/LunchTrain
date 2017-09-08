@@ -12,7 +12,6 @@ import com.google.android.gms.common.SignInButton
 import com.google.firebase.auth.FirebaseAuth
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseUser
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
@@ -22,6 +21,10 @@ import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_login.*
+import android.view.WindowManager
+import android.support.design.widget.CoordinatorLayout
+
+
 
 
 class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -39,6 +42,8 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         val gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -69,6 +74,8 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     override fun onStart() {
         super.onStart()
 
+        showSnack("Hello hello", Snackbar.LENGTH_LONG)
+
         googleApiClient.connect()
         val shouldSignOut = intent.getBooleanExtra("signout", false)
         if(shouldSignOut) {
@@ -95,8 +102,17 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
 
         // Google sign out
         AuthUI.getInstance().signOut(this).addOnCompleteListener {
-            Snackbar.make(login_container, getString(R.string.signed_out), Snackbar.LENGTH_LONG).show()
+            showSnack(getString(R.string.signed_out), Snackbar.LENGTH_LONG)
         }
+    }
+
+    private fun showSnack(text: CharSequence, duration: Int) {
+        val snack = Snackbar.make(login_container, text, duration)
+        val params = snack.view.layoutParams as CoordinatorLayout.LayoutParams
+        params.setMargins(50,0,50,100)
+        snack.view.layoutParams = params
+
+        snack.show()
     }
 
     private fun signIn() {
@@ -141,8 +157,7 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
                     onAuthSuccess(user)
                 } else {
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
-                    Snackbar.make(login_container, "Authentication failed.",
-                            Snackbar.LENGTH_LONG).show()
+                    showSnack("Authentication failed.", Snackbar.LENGTH_LONG)
                     showSignInButton()
                 }
             }
@@ -184,8 +199,6 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     private fun startTrainListActivity(user: FirebaseUser?) {
         showSignOutButton()
         val intent = Intent(this, TrainListActivity::class.java)
-        intent.putExtra("id", user?.providerId)
-        intent.putExtra("name", user?.displayName)
         startActivity(intent)
         finish()
     }
@@ -211,17 +224,14 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     }
 
     override fun onConnectionFailed(result: ConnectionResult) {
-        Snackbar.make(window.decorView, result.errorMessage.toString(), Snackbar.LENGTH_LONG)
+       showSnack(result.errorMessage.toString(), Snackbar.LENGTH_LONG)
     }
 
     override fun onClick(view: View?) {
         when(view?.id) {
             R.id.sign_in_button -> signIn()
             R.id.sign_out_button -> signOut()
-            else -> {
-                Snackbar.make(view as View, "Nope", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
-            }
+            else -> showSnack("Nope", Snackbar.LENGTH_LONG)
         }
     }
 
