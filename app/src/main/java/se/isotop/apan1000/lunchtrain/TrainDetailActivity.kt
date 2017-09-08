@@ -13,8 +13,12 @@ import android.os.Build
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.util.Log
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_train_detail.*
 import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
+import se.isotop.apan1000.lunchtrain.model.Train
 import java.io.Serializable
 
 
@@ -24,7 +28,7 @@ import java.io.Serializable
  * item details are presented side-by-side with a list of items
  * in a [TrainListActivity].
  */
-class TrainDetailActivity : AppCompatActivity() {
+class TrainDetailActivity : AppCompatActivity(), TrainDetailFragment.TrainDetailUpdateListener {
 
     val TAG = "TrainDetailActivity"
 
@@ -38,12 +42,11 @@ class TrainDetailActivity : AppCompatActivity() {
         val itemId = intent.getIntExtra(TrainDetailFragment.ARG_ITEM_ID, 0)
         val trainMap = intent.getSerializableExtra(TrainDetailFragment.ARG_MAP) as MutableMap<String, Any>
 
-        val fab = fab as FloatingActionButton
-        fab.setOnClickListener { view ->
+        join_train_fab.setOnClickListener { view ->
             Snackbar.make(view, "Join/leave train with ID: ${trainMap["id"]}", Snackbar.LENGTH_LONG).show()
             if(trainMap.containsKey("id") && trainMap["id"] != "") {
                 FirebaseHelper.joinOrLeaveTrain(trainMap["id"] as String)
-                fab.isEnabled = false
+                join_train_fab.isEnabled = false
             } else {
                 Log.e(TAG, "trainMap[\"id\"] empty")
             }
@@ -94,6 +97,25 @@ class TrainDetailActivity : AppCompatActivity() {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("signout", true)
         startActivity(intent)
+    }
+
+    override fun onTrainDetailUpdate(train: Train) {
+        toolbar_layout.title = train.title
+
+        if (train.imgUrl.isNotEmpty())
+            loadTrainDetailImage(train.imgUrl)
+
+        join_train_fab.isEnabled = true
+    }
+
+    override fun loadTrainDetailImage(imgUrl: String) {
+        val requestOptions = RequestOptions()
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+
+        Glide.with(this)
+                .load(imgUrl)
+                .apply(requestOptions)
+                .into(detail_image)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

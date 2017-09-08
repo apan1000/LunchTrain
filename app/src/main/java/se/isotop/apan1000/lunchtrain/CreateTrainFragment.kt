@@ -48,6 +48,15 @@ class CreateTrainFragment : Fragment() {
     var imgIsOk = false
     var date = DateTime.now()
 
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is OnCreateTrainInteractionListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context!!.toString() + " must implement OnCreateTrainInteractionListener")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -63,15 +72,6 @@ class CreateTrainFragment : Fragment() {
         initSubmitButton()
 
         return root
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (context is OnCreateTrainInteractionListener) {
-            listener = context
-        } else {
-            throw RuntimeException(context!!.toString() + " must implement OnCreateTrainInteractionListener")
-        }
     }
 
     override fun onDetach() {

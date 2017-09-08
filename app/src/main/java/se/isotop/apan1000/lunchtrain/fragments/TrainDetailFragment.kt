@@ -1,24 +1,21 @@
 package se.isotop.apan1000.lunchtrain.fragments
 
-import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import kotlinx.android.synthetic.main.activity_train_detail.*
 import kotlinx.android.synthetic.main.train_detail.view.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import se.isotop.apan1000.lunchtrain.FirebaseHelper
 import se.isotop.apan1000.lunchtrain.R
+import se.isotop.apan1000.lunchtrain.model.Train
 import java.io.Serializable
 
 /**
@@ -35,17 +32,34 @@ class TrainDetailFragment : Fragment() {
 
     val TAG = "TrainDetailFragment"
 
-    private lateinit var trainMap: MutableMap<String, Any>
+    private lateinit var train: Train
     private lateinit var root: View
-    private lateinit var parentActivity: Activity
+    private var listener: TrainDetailUpdateListener? = null
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+
+        if (context is TrainDetailUpdateListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context!!.toString() + " must implement TrainDetailUpdateListener")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        parentActivity = this.activity
-
         if (arguments.containsKey(ARG_MAP)) {
-            trainMap = arguments.getSerializable(ARG_MAP) as MutableMap<String, Any>
+            val map = arguments.getSerializable(ARG_MAP) as MutableMap<String, Any>
+            train = Train(
+                    map["title"] as String,
+                    map["description"] as String,
+                    map["time"] as String,
+                    map["imgUrl"] as String,
+                    map["passengerCount"] as Int,
+                    map["passengers"] as MutableMap<String, Any>,
+                    map["id"] as String
+            )
         } else {
             throw RuntimeException(context!!.toString() + " must provide ARG_MAP")
         }
@@ -57,7 +71,7 @@ class TrainDetailFragment : Fragment() {
 
         updateUI()
 
-        FirebaseHelper.addTrainEventListener(trainMap["id"] as String, TrainEventListener())
+        FirebaseHelper.addTrainEventListener(train.id, TrainEventListener())
 
         return root
     }
@@ -66,6 +80,11 @@ class TrainDetailFragment : Fragment() {
         super.onDestroy()
 
         FirebaseHelper.removeTrainEventlistener()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 
     inner class TrainEventListener : ValueEventListener {
@@ -82,31 +101,27 @@ class TrainDetailFragment : Fragment() {
         }
 
         private fun snapshotToMap(snapshot: DataSnapshot) {
-            if(snapshot.childrenCount == trainMap.count().toLong())
-                trainMap = mutableMapOf(
-                    "title" to snapshot.child("title").value!!,
-                    "description" to snapshot.child("description").value!!,
-                    "time" to snapshot.child("time").value!!,
-                    "imgUrl" to snapshot.child("imgUrl").value!!,
-                    "passengerCount" to snapshot.child("passengerCount").value!!,
-                    "passengers" to snapshot.child("passengers").value!!,
-                    "id" to snapshot.child("id").value!!
+            if(snapshot.childrenCount == train.toMap().count().toLong()) {
+                train = Train(
+                        snapshot.child("title").value as String,
+                        snapshot.child("description").value as String,
+                        snapshot.child("time").value as String,
+                        snapshot.child("imgUrl").value as String,
+                        (snapshot.child("passengerCount").value as Long).toInt(),
+                        snapshot.child("passengers").value as MutableMap<String, Any>,
+                        snapshot.child("id").value as String
                 )
+            }
         }
     }
 
     private fun updateUI() {
-        parentActivity.toolbar_layout.title = trainMap["title"] as String
+        root.detail_description.text = train.description
+        root.detail_time.text = formatTime(train.time)
 
-        root.detail_description.text = trainMap["description"] as String
-        root.detail_time.text = formatTime(trainMap["time"] as String)
+        root.detail_passenger_count.text = train.passengerCount.toString()
 
-        root.detail_passenger_count.text = trainMap["passengerCount"].toString()
-
-        if (trainMap["imgUrl"] as String != "")
-            loadImage()
-
-        parentActivity.fab.isEnabled = true
+        listener?.onTrainDetailUpdate(train)
     }
 
     private fun formatTime(timeString: String) : String {
@@ -114,16 +129,10 @@ class TrainDetailFragment : Fragment() {
         return fmt.print(DateTime(timeString))
     }
 
-    private fun loadImage() {
-        val imageView = parentActivity.detail_image
+    interface TrainDetailUpdateListener {
+        fun onTrainDetailUpdate(train: Train)
 
-        val requestOptions = RequestOptions()
-        requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-
-        Glide.with(this.context)
-                .load(trainMap["imgUrl"] as String)
-                .apply(requestOptions)
-                .into(imageView)
+        fun loadTrainDetailImage(imgUrl: String)
     }
 
     companion object {

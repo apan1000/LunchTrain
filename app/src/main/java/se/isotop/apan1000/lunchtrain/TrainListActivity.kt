@@ -4,11 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import kotlinx.android.synthetic.main.train_list.*
 import net.danlew.android.joda.JodaTimeAndroid
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
@@ -27,7 +32,8 @@ import java.io.Serializable
  * item details side-by-side using two vertical panes.
  */
 class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteractionListener,
-        CreateTrainFragment.OnCreateTrainInteractionListener {
+        CreateTrainFragment.OnCreateTrainInteractionListener,
+        TrainDetailFragment.TrainDetailUpdateListener {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -88,7 +94,7 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
             val fragment = TrainDetailFragment
                     .newInstance(position, trainMap as Serializable)
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.train_detail_container, fragment)
+                    .replace(R.id.wide_detail, fragment)
                     .commit()
         } else {
             val intent = Intent(context, TrainDetailActivity::class.java)
@@ -133,6 +139,28 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.putExtra("signout", true)
         startActivity(intent)
+    }
+
+    override fun onTrainDetailUpdate(train: Train) {
+        detail_title.text = train.title
+
+        if (train.imgUrl.isNotBlank())
+            loadTrainDetailImage(train.imgUrl)
+        else
+            detail_image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.food_train))
+
+        // TODO: Add a join_train_fab
+        // join_train_fab.isEnabled = true
+    }
+
+    override fun loadTrainDetailImage(imgUrl: String) {
+        val requestOptions = RequestOptions()
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+
+        Glide.with(this)
+                .load(imgUrl)
+                .apply(requestOptions)
+                .into(detail_image)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
