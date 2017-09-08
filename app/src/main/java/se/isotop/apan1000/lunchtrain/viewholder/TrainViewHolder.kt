@@ -5,7 +5,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -13,12 +12,11 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.train_list_item.view.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import se.isotop.apan1000.lunchtrain.FirebaseManager
+import se.isotop.apan1000.lunchtrain.FirebaseHelper
 import se.isotop.apan1000.lunchtrain.R
 import se.isotop.apan1000.lunchtrain.model.Train
 
@@ -30,9 +28,7 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private val TAG = "TrainViewHolder"
 
-    private val databaseRef = FirebaseDatabase.getInstance().reference
-
-    fun bindTrain(train: Train, trainKey: String) {
+    fun bindTrain(train: Train, trainId: String) {
         with(train) {
             itemView.train_image_loader.visibility = View.VISIBLE
 
@@ -44,12 +40,13 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             itemView.train_time.text = shortTime
             itemView.train_passenger_count.text = passengerCount.toString()
 
-            if (passengers.containsKey(getUid())) {
+            val uid = FirebaseHelper.getUid()
+            if (passengers.containsKey(uid) && passengers[uid] == true) {
                 itemView.join_button.setImageResource(R.drawable.ic_check_circle_light_blue_24dp)
             } else {
                 itemView.join_button.setImageResource(R.drawable.ic_check_circle_grey_24dp)
             }
-            showJoinButton()
+            enableJoinButton()
 
             if(imgUrl != "") {
                 val requestOptions = RequestOptions()
@@ -76,48 +73,19 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             }
         }
 
-        itemView.join_button.setOnClickListener { onJoinClicked(trainKey) }
+        itemView.join_button.setOnClickListener { onJoinClicked(trainId) }
     }
 
-    private fun getUid(): String? {
-        return FirebaseAuth.getInstance().currentUser?.uid
+    private fun disableJoinButton() {
+        itemView.join_button.isEnabled = false
     }
 
-    private fun showLoadingJoinButton() {
-        itemView.join_button.visibility = View.INVISIBLE
-        itemView.join_loading_indicator.visibility = View.VISIBLE
+    private fun enableJoinButton() {
+        itemView.join_button.isEnabled = true
     }
 
-    private fun showJoinButton() {
-        itemView.join_loading_indicator.visibility = View.INVISIBLE
-        itemView.join_button.visibility = View.VISIBLE
-    }
-
-    private fun onJoinClicked(trainKey: String) {
-        showLoadingJoinButton()
-
-        val userId = getUid()
-
-        val userRef : DatabaseReference = databaseRef.child("users").child(userId)
-
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val passengerAt = snapshot.child("passengerAt").value as String
-
-                if(passengerAt == trainKey) {
-                    Log.d(TAG, "Same train :) ${snapshot.child("passengerAt").value}")
-                    FirebaseManager.leaveTrain(passengerAt)
-                } else {
-                    Log.d(TAG, "Other train :O $trainKey")
-
-                    FirebaseManager.leaveTrain(passengerAt)
-                    FirebaseManager.joinTrain(trainKey)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError?) {
-                Log.e(TAG, "userRef cancelled: $error")
-            }
-        })
+    private fun onJoinClicked(trainId: String) {
+        disableJoinButton()
+        FirebaseHelper.joinOrLeaveTrain(trainId)
     }
 }

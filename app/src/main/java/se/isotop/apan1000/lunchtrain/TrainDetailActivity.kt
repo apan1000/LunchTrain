@@ -12,8 +12,10 @@ import android.view.MenuItem
 import android.os.Build
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import kotlinx.android.synthetic.main.activity_train_detail.*
 import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
+import java.io.Serializable
 
 
 /**
@@ -24,6 +26,8 @@ import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
  */
 class TrainDetailActivity : AppCompatActivity() {
 
+    val TAG = "TrainDetailActivity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_train_detail)
@@ -31,10 +35,18 @@ class TrainDetailActivity : AppCompatActivity() {
         if(toolbar != null)
             setSupportActionBar(toolbar)
 
+        val itemId = intent.getIntExtra(TrainDetailFragment.ARG_ITEM_ID, 0)
+        val trainMap = intent.getSerializableExtra(TrainDetailFragment.ARG_MAP) as MutableMap<String, Any>
+
         val fab = fab as FloatingActionButton
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            Snackbar.make(view, "Join/leave train with ID: ${trainMap["id"]}", Snackbar.LENGTH_LONG).show()
+            if(trainMap.containsKey("id") && trainMap["id"] != "") {
+                FirebaseHelper.joinOrLeaveTrain(trainMap["id"] as String)
+                fab.isEnabled = false
+            } else {
+                Log.e(TAG, "trainMap[\"id\"] empty")
+            }
         }
 
         // Show the Up button in the action bar.
@@ -50,11 +62,8 @@ class TrainDetailActivity : AppCompatActivity() {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
-            val itemId = intent.getStringExtra(TrainDetailFragment.ARG_ITEM_ID)
-            val trainMap = intent.getSerializableExtra(TrainDetailFragment.ARG_MAP)
-            val fragment = TrainDetailFragment.newInstance(itemId, trainMap)
+            // TODO: Do something with itemId?
+            val fragment = TrainDetailFragment.newInstance(itemId, trainMap as Serializable)
             supportFragmentManager.beginTransaction()
                     .add(R.id.train_detail_container, fragment)
                     .commit()
@@ -110,6 +119,6 @@ class TrainDetailActivity : AppCompatActivity() {
     }
 
     companion object {
-        val EXTRA_TRAIN_KEY: String = "train_key"
+        val EXTRA_TRAIN_ID: String = "train_id"
     }
 }

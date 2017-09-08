@@ -1,5 +1,6 @@
 package se.isotop.apan1000.lunchtrain
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -73,18 +74,26 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         }
     }
 
-    override fun onTrainSelected(view: View, model: Train, position: Int) {
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        if(intent?.hasExtra(EXTRA_TRAIN_MAP) == true) {
+            val trainMap = intent.getSerializableExtra(EXTRA_TRAIN_MAP) as MutableMap<String, Any>
+            onTrainSelected(this, trainMap, 0)
+        }
+    }
+
+    override fun onTrainSelected(context: Context, trainMap: MutableMap<String, Any>, position: Int) {
         if (twoPane) {
             val fragment = TrainDetailFragment
-                    .newInstance(position.toString(), model.toMap() as Serializable)
+                    .newInstance(position, trainMap as Serializable)
             supportFragmentManager.beginTransaction()
                     .replace(R.id.train_detail_container, fragment)
                     .commit()
         } else {
-            val context = view.context
             val intent = Intent(context, TrainDetailActivity::class.java)
-            intent.putExtra(TrainDetailFragment.ARG_ITEM_ID, position.toString())
-            intent.putExtra(TrainDetailFragment.ARG_MAP, model.toMap() as Serializable)
+            intent.putExtra(TrainDetailFragment.ARG_ITEM_ID, position)
+            intent.putExtra(TrainDetailFragment.ARG_MAP, trainMap as Serializable)
 
             context.startActivity(intent)
         }
@@ -105,7 +114,17 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
     }
 
     override fun onCreateTrain(train: Train) {
-        FirebaseManager.writeNewTrain(train)
+        train.id = FirebaseHelper.getNewTrainKey()
+        FirebaseHelper.writeNewTrain(train).addOnSuccessListener {
+            train.passengerCount = 1
+            val uid = FirebaseHelper.getUid()
+            if(uid != null)
+                train.passengers.put(uid, true)
+
+            FirebaseHelper.joinOrLeaveTrain(train.id)
+
+            onTrainSelected(this, train.toMap(), 0)
+        }
     }
 
     private fun signOut() {
@@ -134,5 +153,9 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
     private inline fun consume(f: () -> Unit): Boolean {
         f()
         return true
+    }
+
+    companion object {
+        val EXTRA_TRAIN_MAP = "se.isotop.apan1000.lunchtrain.train_map"
     }
 }

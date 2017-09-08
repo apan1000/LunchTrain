@@ -8,6 +8,7 @@ import android.view.MenuItem
 
 import kotlinx.android.synthetic.main.activity_create_train.*
 import se.isotop.apan1000.lunchtrain.model.Train
+import java.io.Serializable
 
 class CreateTrainActivity : AppCompatActivity(), CreateTrainFragment.OnCreateTrainInteractionListener {
 
@@ -29,7 +30,20 @@ class CreateTrainActivity : AppCompatActivity(), CreateTrainFragment.OnCreateTra
     }
 
     override fun onCreateTrain(train: Train) {
-        FirebaseManager.writeNewTrain(train).addOnSuccessListener {  }
+        train.id = FirebaseHelper.getNewTrainKey()
+        FirebaseHelper.writeNewTrain(train).addOnSuccessListener {
+            train.passengerCount = 1
+            val uid = FirebaseHelper.getUid()
+            if(uid != null)
+                train.passengers.put(uid, true)
+
+            FirebaseHelper.joinOrLeaveTrain(train.id)
+
+            val intent = Intent(this, TrainListActivity::class.java)
+            intent.putExtra(TrainListActivity.EXTRA_TRAIN_MAP, train.toMap() as Serializable)
+            this.startActivity(intent)
+            finish()
+        }
     }
 
     private fun signOut() {

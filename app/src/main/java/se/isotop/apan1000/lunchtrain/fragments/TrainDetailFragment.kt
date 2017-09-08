@@ -3,16 +3,21 @@ package se.isotop.apan1000.lunchtrain.fragments
 import android.app.Activity
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_train_detail.*
 import kotlinx.android.synthetic.main.train_detail.view.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import se.isotop.apan1000.lunchtrain.FirebaseHelper
 import se.isotop.apan1000.lunchtrain.R
 import java.io.Serializable
 
@@ -28,7 +33,9 @@ import java.io.Serializable
  */
 class TrainDetailFragment : Fragment() {
 
-    private lateinit var trainMap: Map<*, *>
+    val TAG = "TrainDetailFragment"
+
+    private lateinit var trainMap: MutableMap<String, Any>
     private lateinit var root: View
     private lateinit var parentActivity: Activity
 
@@ -38,7 +45,9 @@ class TrainDetailFragment : Fragment() {
         parentActivity = this.activity
 
         if (arguments.containsKey(ARG_MAP)) {
-            trainMap = arguments.getSerializable(ARG_MAP) as Map<*, *>
+            trainMap = arguments.getSerializable(ARG_MAP) as MutableMap<String, Any>
+        } else {
+            throw RuntimeException(context!!.toString() + " must provide ARG_MAP")
         }
     }
 
@@ -46,26 +55,63 @@ class TrainDetailFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         root = inflater.inflate(R.layout.train_detail, container, false)
 
-        if (arguments.containsKey(ARG_MAP)) {
-            // Set toolbar title
-            val appBarLayout = parentActivity.toolbar_layout
-            if (appBarLayout != null)
-                appBarLayout.title = trainMap["title"] as String
+        updateUI()
 
-            // Format time
-            val timeString = trainMap["time"] as String
-            val fmt = DateTimeFormat.forPattern("HH:mm")
-            val time = fmt.print(DateTime(timeString))
-
-            root.detail_description.text = trainMap["description"] as String
-            root.detail_time.text = time
-            root.detail_passenger_count.text = (trainMap["passengerCount"] as Int).toString()
-
-            if (trainMap["imgUrl"] as String != "")
-                loadImage()
-        }
+        FirebaseHelper.addTrainEventListener(trainMap["id"] as String, TrainEventListener())
 
         return root
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        FirebaseHelper.removeTrainEventlistener()
+    }
+
+    inner class TrainEventListener : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot?) {
+            Log.d(TAG, "DATA HAS CHANGED: ${snapshot.toString()}")
+            if(snapshot != null) {
+                snapshotToMap(snapshot)
+                updateUI()
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError?) {
+            Log.e(TAG, "Train value event cancelled.")
+        }
+
+        private fun snapshotToMap(snapshot: DataSnapshot) {
+            if(snapshot.childrenCount == trainMap.count().toLong())
+                trainMap = mutableMapOf(
+                    "title" to snapshot.child("title").value!!,
+                    "description" to snapshot.child("description").value!!,
+                    "time" to snapshot.child("time").value!!,
+                    "imgUrl" to snapshot.child("imgUrl").value!!,
+                    "passengerCount" to snapshot.child("passengerCount").value!!,
+                    "passengers" to snapshot.child("passengers").value!!,
+                    "id" to snapshot.child("id").value!!
+                )
+        }
+    }
+
+    private fun updateUI() {
+        parentActivity.toolbar_layout.title = trainMap["title"] as String
+
+        root.detail_description.text = trainMap["description"] as String
+        root.detail_time.text = formatTime(trainMap["time"] as String)
+
+        root.detail_passenger_count.text = trainMap["passengerCount"].toString()
+
+        if (trainMap["imgUrl"] as String != "")
+            loadImage()
+
+        parentActivity.fab.isEnabled = true
+    }
+
+    private fun formatTime(timeString: String) : String {
+        val fmt = DateTimeFormat.forPattern("HH:mm")
+        return fmt.print(DateTime(timeString))
     }
 
     private fun loadImage() {
@@ -74,7 +120,7 @@ class TrainDetailFragment : Fragment() {
         val requestOptions = RequestOptions()
         requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
 
-        Glide.with(parentActivity)
+        Glide.with(this.context)
                 .load(trainMap["imgUrl"] as String)
                 .apply(requestOptions)
                 .into(imageView)
@@ -96,10 +142,10 @@ class TrainDetailFragment : Fragment() {
          * @param trainMap Map of the train data.
          * @return A new instance of fragment TrainDetailFragment.
          */
-        fun newInstance(itemId: String, serializedTrainMap: Serializable): TrainDetailFragment {
+        fun newInstance(itemId: Int, serializedTrainMap: Serializable): TrainDetailFragment {
             val fragment = TrainDetailFragment()
             val args = Bundle()
-            args.putString(ARG_ITEM_ID, itemId)
+            args.putInt(ARG_ITEM_ID, itemId)
             args.putSerializable(ARG_MAP, serializedTrainMap)
             fragment.arguments = args
             return fragment
