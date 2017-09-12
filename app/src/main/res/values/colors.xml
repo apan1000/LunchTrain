@@ -8,6 +8,10 @@
 
     <color name="btn_submit_train_disabled">@color/grey_400</color>
 
+    <color name="btn_train_joined">@color/light_blue_500</color>
+    <color name="btn_train_not_joined">@color/grey_600</color>
+    <color name="btn_train_leave">@color/red_500</color>
+
     <!-- Material design colors -->
     <!-- Red -->
     <color name="red_50">#FFEBEE</color>

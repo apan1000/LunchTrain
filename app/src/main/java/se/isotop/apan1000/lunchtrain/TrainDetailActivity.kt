@@ -2,10 +2,7 @@ package se.isotop.apan1000.lunchtrain
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
-import android.support.v7.widget.Toolbar
-import android.view.View
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -20,6 +17,9 @@ import kotlinx.android.synthetic.main.activity_train_detail.*
 import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
 import se.isotop.apan1000.lunchtrain.model.Train
 import java.io.Serializable
+import android.content.res.ColorStateList
+
+
 
 
 /**
@@ -105,7 +105,26 @@ class TrainDetailActivity : AppCompatActivity(), TrainDetailFragment.TrainDetail
         if (train.imgUrl.isNotEmpty())
             loadTrainDetailImage(train.imgUrl)
 
+        if(train.passengers.containsKey(FirebaseHelper.getUid()) &&
+                train.passengers[FirebaseHelper.getUid()] == true) {
+            setJoinTrainFabColor(ContextCompat.getColor(this, R.color.light_blue_500))
+        } else {
+            setJoinTrainFabColor(ContextCompat.getColor(this, R.color.grey_600))
+        }
         join_train_fab.isEnabled = true
+    }
+
+    private fun setJoinTrainFabColor(defaultColor: Int) {
+        val tintList = ColorStateList(
+                arrayOf(intArrayOf(-android.R.attr.state_enabled),
+                        intArrayOf()
+                ),
+                intArrayOf(defaultColor,
+                        defaultColor
+                )
+        )
+
+        join_train_fab.backgroundTintList = tintList
     }
 
     override fun loadTrainDetailImage(imgUrl: String) {

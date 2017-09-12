@@ -67,6 +67,7 @@
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@+id/train_detail_container"
         app:layout_anchorGravity="top|end"
-        app:srcCompat="@android:drawable/stat_notify_chat" />
+        app:borderWidth="0dp"
+        app:srcCompat="@drawable/ic_check_white_24dp" />
 
 </android.support.design.widget.CoordinatorLayout>
