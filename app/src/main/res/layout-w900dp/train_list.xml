@@ -2,22 +2,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context="se.isotop.apan1000.lunchtrain.TrainListActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:baselineAligned="false"
-        android:divider="?android:attr/dividerHorizontal"
-        android:orientation="horizontal"
-        android:showDividers="middle"
-        tools:context="se.isotop.apan1000.lunchtrain.TrainListActivity">
+        android:orientation="horizontal">
 
         <!--
         This layout is a two-pane layout for the Trains
         master/detail flow.
         -->
 
+        <!-- TODO: Remove LinearLayout and use ConstrainLayout as direct parent -->
         <FrameLayout
             android:id="@+id/train_list_container"
             android:layout_width="0dp"
@@ -99,13 +98,18 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.1875"/>
 
-    <!-- TODO: Move to bottom right -->
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline_train_list_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.375"/>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_train_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="@+id/guideline_train_list_right"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_add_white_24dp" />
