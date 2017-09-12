@@ -191,7 +191,8 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
                 "username" to username,
                 "email" to email,
                 "photoUrl" to photoUrl,
-                "passengerAt" to "")
+                "passengerAt" to "",
+                "driver" to false)
 
         databaseRef.child("users").child(userId).setValue(user)
     }
