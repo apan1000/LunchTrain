@@ -1,30 +1,30 @@
 package se.isotop.apan1000.lunchtrain
 
-import android.support.v7.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.view.View
-import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.common.SignInButton
-import com.google.firebase.auth.FirebaseAuth
-import android.content.Intent
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.firebase.auth.FirebaseUser
-import com.google.android.gms.auth.api.signin.GoogleSignInResult
+import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ProgressBar
 import com.firebase.ui.auth.AuthUI
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInResult
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.SignInButton
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_login.*
-import android.view.WindowManager
-import android.support.design.widget.CoordinatorLayout
-
-
 
 
 class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -74,8 +74,6 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     override fun onStart() {
         super.onStart()
 
-        showSnack("Hello hello", Snackbar.LENGTH_LONG)
-
         googleApiClient.connect()
         val shouldSignOut = intent.getBooleanExtra("signout", false)
         if(shouldSignOut) {
@@ -107,12 +105,14 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     }
 
     private fun showSnack(text: CharSequence, duration: Int) {
-        val snack = Snackbar.make(login_container, text, duration)
-        val params = snack.view.layoutParams as CoordinatorLayout.LayoutParams
-        params.setMargins(50,0,50,100)
-        snack.view.layoutParams = params
-
-        snack.show()
+        Snackbar.make(login_container, text, duration).apply {
+            view.apply {
+                val navSize = getNavigationBarSize(context)
+                Log.d(TAG, "navSize: $navSize")
+                if(navSize.x > navSize.y)
+                    setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom + navSize.y)
+            }
+        }.show()
     }
 
     private fun signIn() {
