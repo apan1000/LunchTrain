@@ -45,7 +45,7 @@ class CreateTrainFragment : Fragment() {
     lateinit private var submitTrainButton: Button
     lateinit private var imgView: ImageView
 
-    var imgIsOk = false
+    var imgIsOk = true
     var date = DateTime.now()
 
     override fun onAttach(context: Context?) {
