@@ -79,7 +79,7 @@ class TrainDetailFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
 
-        FirebaseHelper.removeTrainEventlistener()
+        FirebaseHelper.removeTrainEventListener()
     }
 
     override fun onDetach() {

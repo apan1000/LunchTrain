@@ -187,7 +187,7 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
     }
 
     private fun writeNewUser(userId: String?, username: String?, email: String?, photoUrl: String?) {
-        val user = mutableMapOf<String, Any?>(
+        val user = mutableMapOf(
                 "username" to username,
                 "email" to email,
                 "photoUrl" to photoUrl,

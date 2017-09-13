@@ -31,7 +31,7 @@ object FirebaseHelper {
         trainEventListener = currentTrainRef.addValueEventListener(eventListener)
     }
 
-    fun removeTrainEventlistener() {
+    fun removeTrainEventListener() {
         currentTrainRef.removeEventListener(trainEventListener)
     }
 
@@ -101,10 +101,6 @@ object FirebaseHelper {
                     }
 
                     mutableData.value = t
-//                    if(t.passengerCount > 0)
-//                        mutableData.value = t
-//                    else
-//                        mutableData.value = null
                     return Transaction.success(mutableData)
                 }
 
