@@ -107,19 +107,27 @@ class TrainDetailActivity : AppCompatActivity(), TrainDetailFragment.TrainDetail
 
         if(train.passengers.containsKey(FirebaseHelper.getUid()) &&
                 train.passengers[FirebaseHelper.getUid()] == true) {
-            setJoinTrainFabColor(ContextCompat.getColor(this, R.color.light_blue_500))
+            setJoinTrainFabColor(R.color.btn_train_joined,
+                    R.color.btn_train_leave,
+                    R.color.btn_train_not_joined)
         } else {
-            setJoinTrainFabColor(ContextCompat.getColor(this, R.color.grey_600))
+            setJoinTrainFabColor(R.color.btn_train_not_joined)
         }
         join_train_fab.isEnabled = true
     }
 
-    private fun setJoinTrainFabColor(defaultColor: Int) {
+    private fun setJoinTrainFabColor(defaultId: Int, pressedId: Int = defaultId, disabledId: Int = defaultId) {
+        val defaultColor = ContextCompat.getColor(this, defaultId)
+        val pressedColor = ContextCompat.getColor(this, pressedId)
+        val disabledColor = ContextCompat.getColor(this, disabledId)
+
         val tintList = ColorStateList(
                 arrayOf(intArrayOf(-android.R.attr.state_enabled),
+                        intArrayOf(android.R.attr.state_pressed),
                         intArrayOf()
                 ),
-                intArrayOf(defaultColor,
+                intArrayOf(disabledColor,
+                        pressedColor,
                         defaultColor
                 )
         )

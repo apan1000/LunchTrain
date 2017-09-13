@@ -128,13 +128,15 @@
             android:id="@+id/join_button"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            app:srcCompat="@drawable/ic_check_white_24dp"
-            android:scaleType="fitCenter"
             android:layout_marginLeft="-6dp"
             android:layout_marginRight="-6dp"
+            android:paddingBottom="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:srcCompat="@drawable/ic_check_white_24dp"
+            android:scaleType="fitCenter"
+            android:background="@drawable/btn_join" />
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline_image_bottom"

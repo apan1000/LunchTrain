@@ -44,15 +44,7 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             itemView.train_passenger_count.text = passengerCount.toString()
 
             val uid = FirebaseHelper.getUid()
-            if (passengers.containsKey(uid) && passengers[uid] == true) {
-//                itemView.join_button.setImageResource(R.drawable.ic_check_circle_light_blue_24dp)
-                setJoinButtonColor(R.color.btn_train_joined,
-                        R.color.btn_train_leave,
-                        R.color.btn_train_not_joined)
-            } else {
-//                itemView.join_button.setImageResource(R.drawable.ic_check_circle_grey_24dp)
-                setJoinButtonColor(R.color.btn_train_not_joined)
-            }
+            itemView.join_button.isSelected = passengers[uid] == true
             enableJoinButton()
 
             if(imgUrl != "") {

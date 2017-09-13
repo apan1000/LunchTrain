@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+    <item>
+        <selector xmlns:android="http://schemas.android.com/apk/res/android">
+            <item android:drawable="@color/btn_train_not_joined" android:state_selected="false"/>
+            <item android:drawable="@color/btn_train_leave" android:state_pressed="true"/>
+            <item android:drawable="@color/btn_train_joined"/>
+        </selector>
+    </item>
+</ripple>

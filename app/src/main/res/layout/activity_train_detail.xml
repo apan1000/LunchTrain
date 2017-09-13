@@ -68,6 +68,7 @@
         app:layout_anchor="@+id/train_detail_container"
         app:layout_anchorGravity="top|end"
         app:borderWidth="0dp"
-        app:srcCompat="@drawable/ic_check_white_24dp" />
+        app:srcCompat="@drawable/ic_check_white_24dp"
+        app:backgroundTint="@color/btn_train_joined"/>
 
 </android.support.design.widget.CoordinatorLayout>
