@@ -1,5 +1,6 @@
 package se.isotop.apan1000.lunchtrain
 
+import android.graphics.Bitmap
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
@@ -151,6 +152,10 @@ object FirebaseHelper {
              * End transaction
              */
         }
+    }
+
+    fun uploadImage(bitmap: Bitmap) {
+        // TODO: Upload image to firebase storage
     }
 
 }
