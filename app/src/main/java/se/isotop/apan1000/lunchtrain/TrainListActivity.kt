@@ -32,7 +32,7 @@ import java.io.Serializable
  * item details side-by-side using two vertical panes.
  */
 class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteractionListener,
-        CreateTrainFragment.OnCreateTrainInteractionListener,
+        CreateTrainFragment.CreateTrainInteractionListener,
         TrainDetailFragment.TrainDetailUpdateListener {
 
     /**

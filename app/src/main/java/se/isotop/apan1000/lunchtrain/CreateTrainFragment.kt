@@ -3,6 +3,8 @@ package se.isotop.apan1000.lunchtrain
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -43,7 +45,7 @@ import kotlinx.android.synthetic.main.fragment_create_train.*
 /**
  * A simple [Fragment] subclass.
  * Activities that contain this fragment must implement the
- * [CreateTrainFragment.OnCreateTrainInteractionListener] interface
+ * [CreateTrainFragment.CreateTrainInteractionListener] interface
  * to handle interaction events.
  * Use the [CreateTrainFragment.newInstance] factory method to
  * create an instance of this fragment.
@@ -56,7 +58,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
     private val BOUNDS_GREATER_SYDNEY = LatLngBounds(
             LatLng(-34.041458, 150.790100), LatLng(-33.682247, 151.383362))
 
-    private var listener: OnCreateTrainInteractionListener? = null
+    private var listener: CreateTrainInteractionListener? = null
 
     lateinit private var root: View
 
@@ -65,39 +67,48 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
     lateinit private var placeAdapter: PlaceAutocompleteAdapter
 
     lateinit private var autocompleteView: AutoCompleteTextView
+    lateinit private var clearDestinationButton: ImageButton
     lateinit private var descriptionEdit: EditText
     lateinit private var urlEdit: EditText
     lateinit private var timeText: TextView
     lateinit private var submitTrainButton: Button
     lateinit private var imgView: ImageView
+    lateinit private var trainImage: Bitmap
+    lateinit private var defaultImage: Bitmap
 
     var imgIsOk = true
     var date = DateTime.now()
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (context is OnCreateTrainInteractionListener) {
+        if (context is CreateTrainInteractionListener) {
             listener = context
         } else {
-            throw RuntimeException(context!!.toString() + " must implement OnCreateTrainInteractionListener")
+            throw RuntimeException(context!!.toString() + " must implement CreateTrainInteractionListener")
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        googleApiClient = GoogleApiClient.Builder(context)
-                .enableAutoManage(context as FragmentActivity, 0 /* clientId */, this)
-                .addApi(Places.GEO_DATA_API)
-                .build()
+        retainInstance = true
+
+        defaultImage = BitmapFactory.decodeResource(resources, R.drawable.food_train)
+        trainImage = defaultImage
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+
         // Inflate the layout for this fragment
         root = inflater!!.inflate(R.layout.fragment_create_train, container, false)
 
-        imgView = root.create_train_image
+        googleApiClient = GoogleApiClient.Builder(context)
+                .enableAutoManage(context as FragmentActivity, 0 /* clientId */, this)
+                .addApi(Places.GEO_DATA_API)
+                .build()
+
+        initImageView()
         initEditTextViews()
         initTimeText()
         initSubmitButton()
@@ -111,9 +122,27 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
         return root
     }
 
+    override fun onResume() {
+        super.onResume()
+        imgView.setImageBitmap(trainImage)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        googleApiClient.disconnect()
+        autocompleteView.onItemClickListener = null
+        urlEdit.removeTextChangedListener(urlTextWatcher)
+    }
+
+
     override fun onDetach() {
         super.onDetach()
         listener = null
+    }
+
+    private fun initImageView() {
+        imgView = root.create_train_image
+        imgView.setImageBitmap(trainImage)
     }
 
     private fun initEditTextViews() {
@@ -121,7 +150,11 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
         descriptionEdit = root.edit_description
         urlEdit = root.edit_img_url
 
-        urlEdit.addTextChangedListener(urlTextWatcher())
+        urlEdit.addTextChangedListener(urlTextWatcher)
+    }
+
+    private fun initClearTextButton() {
+//        clearDestinationButton
     }
 
     private fun initTimeText() {
@@ -166,7 +199,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
         submitTrainButton.isEnabled = titleIsOk && descIsOk && imgIsOk
     }
 
-    inner class urlTextWatcher : TextWatcher {
+    private val urlTextWatcher = object : TextWatcher {
         private val p = Pattern.compile(".*\\.(gif|jpe?g|png|webp)$")
 
         override fun afterTextChanged(editable: Editable?) {
@@ -261,11 +294,14 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
                 placePhotos.photoMetadata[0].getPhoto(googleApiClient).setResultCallback { photoResult ->
                     if (photoResult.status.isSuccess) {
                         // TODO: Ladda upp bitmap till firebase storagefire
-                        create_train_image.setImageBitmap(photoResult.bitmap)
+                        trainImage = photoResult.bitmap
+                        create_train_image.setImageBitmap(trainImage)
                         root.image_loader.visibility = View.INVISIBLE
                     }
                 }
             } else {
+                trainImage = defaultImage
+                create_train_image.setImageBitmap(trainImage)
                 root.image_loader.visibility = View.INVISIBLE
             }
         }
@@ -289,13 +325,14 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
         // Get the Place object from the buffer.
         val place = places.get(0)
 
-        // TODO: Visa @drawable/powered_by_google_light || dark
         // TODO: Use rating, and create layout for info stuff
 
         // Format details of the place for display and show it in a TextView.
-        descriptionEdit.setText(formatPlaceDetails(resources, place.name,
-                place.id, place.address, place.phoneNumber,
-                place.websiteUri))
+        if(isAdded) {
+            descriptionEdit.setText(formatPlaceDetails(resources, place.name,
+                    place.id, place.address, place.phoneNumber,
+                    place.websiteUri))
+        }
 
         Log.i(TAG, "Place details received: " + place.name)
 
@@ -318,7 +355,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
      * to the activity and potentially other fragments contained in that
      * activity.
      */
-    interface OnCreateTrainInteractionListener {
+    interface CreateTrainInteractionListener {
         fun onCreateTrain(train: Train)
     }
 

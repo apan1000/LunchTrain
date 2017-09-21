@@ -3,6 +3,7 @@ package se.isotop.apan1000.lunchtrain
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 
@@ -10,9 +11,12 @@ import kotlinx.android.synthetic.main.activity_create_train.*
 import se.isotop.apan1000.lunchtrain.model.Train
 import java.io.Serializable
 
-class CreateTrainActivity : AppCompatActivity(), CreateTrainFragment.OnCreateTrainInteractionListener {
+class CreateTrainActivity : AppCompatActivity(), CreateTrainFragment.CreateTrainInteractionListener {
 
     private val TAG = "CreateTrainActivity"
+    private val TAG_CREATE_TRAIN_FRAGMENT = "CreateTrainFragment"
+
+    private var createTrainFragment: CreateTrainFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,11 +25,26 @@ class CreateTrainActivity : AppCompatActivity(), CreateTrainFragment.OnCreateTra
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        if (savedInstanceState == null) {
-            val fragment = CreateTrainFragment.newInstance()
+        createTrainFragment = supportFragmentManager
+                .findFragmentByTag(TAG_CREATE_TRAIN_FRAGMENT) as CreateTrainFragment?
+
+        if (createTrainFragment == null) {
+            Log.e(TAG, "CreateTrainFragment is null!")
+            createTrainFragment = CreateTrainFragment.newInstance()
             supportFragmentManager.beginTransaction()
-                    .add(R.id.create_train_container, fragment)
+                    .add(R.id.create_train_container, createTrainFragment,
+                            TAG_CREATE_TRAIN_FRAGMENT)
                     .commit()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if (isFinishing) {
+            // we will not need this fragment anymore, this may also be a good place to signal
+            // to the retained fragment object to perform its own cleanup.
+            supportFragmentManager.beginTransaction().remove(createTrainFragment).commit()
         }
     }
 
