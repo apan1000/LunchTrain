@@ -166,14 +166,14 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
 
         // Start TimePickerDialog on timeText click
         timeText.setOnClickListener { view ->
-            val hour = DateTime.now().hourOfDay
-            val minute = DateTime.now().minuteOfHour
+            val hour = date.hourOfDay
+            val minute = date.minuteOfHour
 
             val timePicker = TimePickerDialog(context, TimePickerDialog.OnTimeSetListener {
                 picker, selectedHour, selectedMinute ->
                 timeText.text = root.resources.getString(R.string.time_text, selectedHour, selectedMinute)
                 date = DateTime.now().withHourOfDay(selectedHour).withMinuteOfHour(selectedMinute)
-            }, hour+1, 0, true)
+            }, hour, minute, true)
             timePicker.show()
         }
     }
