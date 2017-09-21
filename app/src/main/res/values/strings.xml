@@ -115,4 +115,5 @@
     <string name="title_train_detail">Train Detail</string>
     <string name="title_activity_create_train">Create New Train</string>
     <string name="clear_text">Clear text</string>
+    <string name="destination_image">Destination image</string>
 </resources>

@@ -41,6 +41,7 @@
     <style name="ClearEditButton" parent="Widget.AppCompat.ImageButton">
         <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
         <item name="android:tint">@color/btn_clear_edit_tint</item>
+        <item name="android:padding">8dp</item>
     </style>
 
 </resources>

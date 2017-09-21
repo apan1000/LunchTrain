@@ -165,8 +165,7 @@ class TrainListFragment : Fragment() {
          * @return A new instance of fragment TrainListFragment.
          */
         fun newInstance(): TrainListFragment {
-            val fragment = TrainListFragment()
-            return fragment
+            return TrainListFragment()
         }
     }
 }
