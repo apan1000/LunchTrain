@@ -138,22 +138,22 @@ class TrainListFragment : Fragment() {
                                      modelLayout: Int,
                                      viewHolderClass: Class<TrainViewHolder>,
                                      query: Query)
-        : FirebaseRecyclerAdapter<Train, TrainViewHolder>(modelClass,modelLayout, viewHolderClass, query) {
+        : FirebaseRecyclerAdapter<Train, TrainViewHolder>(
+            modelClass,
+            modelLayout,
+            viewHolderClass,
+            query) {
 
         override fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
-            val trainRef = getRef(position)
-
             // Set click listener for the whole train view
-            val trainKey = trainRef.key
             viewHolder.itemView.setOnClickListener { v ->
                 listener?.onTrainSelected(v.context, model.toMap(), position)
             }
 
-            viewHolder.bindTrain(model, trainKey)
+            viewHolder.bindTrain(model)
 
             showTrainsView()
         }
-
     }
 
     companion object {

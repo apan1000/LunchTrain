@@ -1,9 +1,5 @@
 package se.isotop.apan1000.lunchtrain.model
 
-
-/**
- * Created by apan1000 on 2017-08-17.
- */
 data class Train(var title: String = "",
                  var description: String = "",
                  var time: String = "",

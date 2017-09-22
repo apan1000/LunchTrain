@@ -28,51 +28,70 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private val TAG = "TrainViewHolder"
 
-    fun bindTrain(train: Train, trainId: String) {
+    private val timeFormat = DateTimeFormat.forPattern("HH:mm")
+
+    fun bindTrain(train: Train) {
         with(train) {
             itemView.train_image_loader.visibility = View.VISIBLE
 
-            val fmt = DateTimeFormat.forPattern("HH:mm")
-            val shortTime = fmt.print(DateTime(time))
-
-            itemView.train_title.text = title
-            if(description.isNotEmpty())
-                itemView.train_description.text = description
-            else
-                itemView.train_description.text = itemView.resources.getString(R.string.default_description)
-            itemView.train_time.text = shortTime
-            itemView.train_passenger_count.text = passengerCount.toString()
+            setTitle(title)
+            setDescription(description)
+            setTime(time)
+            setPassengerCount(passengerCount.toString())
 
             val uid = FirebaseHelper.getUid()
             itemView.join_button.isSelected = passengers[uid] == true
             enableJoinButton()
 
-            if(imgUrl != "") {
-                val requestOptions = RequestOptions()
-                requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            setImage(imgUrl)
 
-                Glide.with(itemView.context)
-                        .load(imgUrl)
-                        .listener(object : RequestListener<Drawable> {
-                            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                                itemView.train_image_loader.visibility = View.GONE
-                                return false
-                            }
-
-                            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                                itemView.train_image_loader.visibility = View.GONE
-                                return false
-                            }
-                        })
-                        .apply(requestOptions)
-                        .into(itemView.train_image)
-            } else {
-                itemView.train_image_loader.visibility = View.GONE
-                itemView.train_image.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.food_train))
-            }
+            itemView.join_button.setOnClickListener { onJoinClicked(id) }
         }
+    }
 
-        itemView.join_button.setOnClickListener { onJoinClicked(trainId) }
+    fun setTitle(title: String) {
+        itemView.train_title.text = title
+    }
+
+    fun setDescription(description: String) {
+        if(description.isNotEmpty())
+            itemView.train_description.text = description
+        else
+            itemView.train_description.text = itemView.resources.getString(R.string.default_description)
+    }
+
+    fun setTime(time: String) {
+        itemView.train_time.text = timeFormat.print(DateTime(time))
+    }
+
+    fun setPassengerCount(passengerCount: String) {
+        itemView.train_passenger_count.text = passengerCount
+    }
+
+    fun setImage(imgUrl: String) {
+        if(imgUrl != "") {
+            val requestOptions = RequestOptions()
+            requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+
+            Glide.with(itemView.context)
+                    .load(imgUrl)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                            itemView.train_image_loader.visibility = View.GONE
+                            return false
+                        }
+
+                        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                            itemView.train_image_loader.visibility = View.GONE
+                            return false
+                        }
+                    })
+                    .apply(requestOptions)
+                    .into(itemView.train_image)
+        } else {
+            itemView.train_image_loader.visibility = View.GONE
+            itemView.train_image.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.food_train))
+        }
     }
 
     private fun disableJoinButton() {
