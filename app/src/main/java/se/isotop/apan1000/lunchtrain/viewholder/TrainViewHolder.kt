@@ -6,6 +6,8 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.ScaleAnimation
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -13,6 +15,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
+import kotlinx.android.synthetic.main.fragment_create_train.view.*
 import kotlinx.android.synthetic.main.train_list_item.view.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -94,12 +97,24 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         }
     }
 
+    fun bindPassengerCount(time: Int) {
+        setTime(time.toString())
+        setAnimation(itemView.time_text)
+    }
+
     private fun disableJoinButton() {
         itemView.join_button.isEnabled = false
     }
 
     private fun enableJoinButton() {
         itemView.join_button.isEnabled = true
+    }
+
+    private fun setAnimation(viewToAnimate: View) {
+        val anim = ScaleAnimation(1.0f, 1.0f, -0.25f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.0f)
+        anim.duration = 660
+        anim.setInterpolator(itemView.context, android.R.anim.bounce_interpolator)
+        viewToAnimate.startAnimation(anim)
     }
 
     private fun setJoinButtonColor(defaultId: Int, pressedId: Int = defaultId, disabledId: Int = defaultId) {

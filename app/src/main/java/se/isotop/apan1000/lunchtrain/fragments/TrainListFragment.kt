@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import com.firebase.ui.database.ClassSnapshotParser
+import com.firebase.ui.database.FirebaseArray
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -19,6 +21,7 @@ import kotlinx.android.synthetic.main.fragment_train_list.view.*
 import kotlinx.android.synthetic.main.train_list.*
 import org.joda.time.DateTime
 import se.isotop.apan1000.lunchtrain.R
+import se.isotop.apan1000.lunchtrain.TrainRecyclerAdapter
 import se.isotop.apan1000.lunchtrain.model.Train
 import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
 
@@ -31,7 +34,7 @@ import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
  * Use the [TrainListFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TrainListFragment : Fragment() {
+class TrainListFragment : Fragment(), TrainRecyclerAdapter.TrainListListener {
 
     private val TAG = "TrainListFragment"
 
@@ -40,7 +43,8 @@ class TrainListFragment : Fragment() {
 
     lateinit private var databaseRef: DatabaseReference
 
-    lateinit private var adapter: FirebaseRecyclerAdapter<Train, TrainViewHolder>
+    lateinit private var firebaseAdapter: FirebaseRecyclerAdapter<Train, TrainViewHolder>
+    lateinit private var adapter: TrainRecyclerAdapter
     lateinit private var recyclerView: RecyclerView
 
     lateinit private var loadingIndicator: ProgressBar
@@ -81,9 +85,11 @@ class TrainListFragment : Fragment() {
 
         databaseRef = FirebaseDatabase.getInstance().reference
         val trainsQuery: Query = getQuery(databaseRef)
+        val parser = ClassSnapshotParser<Train>(Train::class.java)
+        val firebaseArray = FirebaseArray<Train>(trainsQuery, parser)
 
-        adapter = TrainRecyclerAdapter(Train::class.java, R.layout.train_list_item,
-                TrainViewHolder::class.java, trainsQuery)
+        adapter = TrainRecyclerAdapter(context, firebaseArray, R.layout.train_list_item,
+                TrainViewHolder::class.java, this)
         recyclerView.adapter = adapter
     }
 
@@ -127,37 +133,42 @@ class TrainListFragment : Fragment() {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     *
-     * See the Android Training lesson [Communicating with Other Fragments](http://developer.android.com/training/basics/fragments/communicating.html) for more information.
      */
     interface OnTrainInteractionListener {
         fun onTrainSelected(context: Context, trainMap: MutableMap<String, Any>, position: Int)
     }
 
-    inner class TrainRecyclerAdapter(modelClass: Class<Train>,
-                                     modelLayout: Int,
-                                     viewHolderClass: Class<TrainViewHolder>,
-                                     query: Query)
-        : FirebaseRecyclerAdapter<Train, TrainViewHolder>(
-            modelClass,
-            modelLayout,
-            viewHolderClass,
-            query) {
+//    inner class TrainRecyclerAdapter(modelClass: Class<Train>,
+//                                     modelLayout: Int,
+//                                     viewHolderClass: Class<TrainViewHolder>,
+//                                     query: Query)
+//        : FirebaseRecyclerAdapter<Train, TrainViewHolder>(
+//            modelClass,
+//            modelLayout,
+//            viewHolderClass,
+//            query) {
+//
+//        override fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
+//            // Set click listener for the whole train view
+//            viewHolder.itemView.setOnClickListener { v ->
+//                listener?.onTrainSelected(v.context, model.toMap(), position)
+//            }
+//
+//            viewHolder.bindTrain(model)
+//
+//            showTrainsView()
+//        }
+//    }
 
-        override fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
-            // Set click listener for the whole train view
-            viewHolder.itemView.setOnClickListener { v ->
-                listener?.onTrainSelected(v.context, model.toMap(), position)
-            }
-
-            viewHolder.bindTrain(model)
-
-            showTrainsView()
+    override fun onTrainListResult(viewHolder: TrainViewHolder, model: Train, position: Int) {
+        viewHolder.itemView.setOnClickListener { v ->
+            listener?.onTrainSelected(v.context, model.toMap(), position)
         }
+
+        showTrainsView()
     }
 
     companion object {
-
         /**
          * Use this factory method to create a new instance of
          * this fragment.
