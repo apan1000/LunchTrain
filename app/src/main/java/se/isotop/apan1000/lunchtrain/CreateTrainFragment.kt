@@ -130,10 +130,13 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
     override fun onStop() {
         super.onStop()
         googleApiClient.disconnect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         autocompleteView.onItemClickListener = null
         urlEdit.removeTextChangedListener(urlTextWatcher)
     }
-
 
     override fun onDetach() {
         super.onDetach()
@@ -182,6 +185,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
         submitTrainButton = root.submit_train_button
 
         submitTrainButton.setOnClickListener {
+            // TODO: Ladda upp bitmap till firebase storage
             val train = Train(autocompleteView.text.toString(),
                     descriptionEdit.text.toString(),
                     date.toString(),
@@ -293,7 +297,6 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
                 // TODO: Visa placePhotos.photoMetadata[0].attributions vid bilden
                 placePhotos.photoMetadata[0].getPhoto(googleApiClient).setResultCallback { photoResult ->
                     if (photoResult.status.isSuccess) {
-                        // TODO: Ladda upp bitmap till firebase storagefire
                         trainImage = photoResult.bitmap
                         create_train_image.setImageBitmap(trainImage)
                         root.image_loader.visibility = View.INVISIBLE
@@ -322,19 +325,20 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
             places.release()
             return@ResultCallback
         }
-        // Get the Place object from the buffer.
-        val place = places.get(0)
 
-        // TODO: Use rating, and create layout for info stuff
-
-        // Format details of the place for display and show it in a TextView.
         if(isAdded) {
+            // Get the Place object from the buffer.
+            val place = places.get(0)
+
+            // TODO: Use rating, and create layout for info stuff
+
+            // Format details of the place for display and show it in a TextView.
             descriptionEdit.setText(formatPlaceDetails(resources, place.name,
                     place.id, place.address, place.phoneNumber,
                     place.websiteUri))
-        }
 
-        Log.i(TAG, "Place details received: " + place.name)
+            Log.i(TAG, "Place details received: " + place.name)
+        }
 
         places.release()
     }
