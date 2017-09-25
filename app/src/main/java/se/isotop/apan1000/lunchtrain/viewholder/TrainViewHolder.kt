@@ -33,6 +33,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private val timeFormat = DateTimeFormat.forPattern("HH:mm")
 
+    private var oldTrain = Train()
+
     fun bindTrain(train: Train) {
         with(train) {
             itemView.train_image_loader.visibility = View.VISIBLE
@@ -67,8 +69,20 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         itemView.train_time.text = timeFormat.print(DateTime(time))
     }
 
-    fun setPassengerCount(passengerCount: String) {
+    fun setPassengerCount(passengerCount: String, animate: Boolean = false) {
         itemView.train_passenger_count.text = passengerCount
+        if(animate) {
+            val anim = ScaleAnimation(
+                    1.0f, 1.0f,
+                    0.1f, 1.0f,
+                    Animation.RELATIVE_TO_SELF, 0.5f,
+                    Animation.RELATIVE_TO_SELF, 0.0f
+            )
+            anim.duration = 890
+            anim.setInterpolator(itemView.context, android.R.anim.bounce_interpolator)
+
+            itemView.train_passenger_count.startAnimation(anim)
+        }
     }
 
     fun setImage(imgUrl: String) {
@@ -97,9 +111,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         }
     }
 
-    fun bindPassengerCount(time: Int) {
-        setTime(time.toString())
-        setAnimation(itemView.time_text)
+    fun changePassengerCount(passengerCount: String) {
+        setPassengerCount(passengerCount)
     }
 
     private fun disableJoinButton() {
@@ -108,13 +121,6 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private fun enableJoinButton() {
         itemView.join_button.isEnabled = true
-    }
-
-    private fun setAnimation(viewToAnimate: View) {
-        val anim = ScaleAnimation(1.0f, 1.0f, -0.25f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.0f)
-        anim.duration = 660
-        anim.setInterpolator(itemView.context, android.R.anim.bounce_interpolator)
-        viewToAnimate.startAnimation(anim)
     }
 
     private fun setJoinButtonColor(defaultId: Int, pressedId: Int = defaultId, disabledId: Int = defaultId) {

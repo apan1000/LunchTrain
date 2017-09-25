@@ -13,8 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.firebase.ui.database.ChangeEventListener
 import com.firebase.ui.database.ObservableSnapshotArray
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.*
 import se.isotop.apan1000.lunchtrain.model.Train
 import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
 import java.lang.reflect.InvocationTargetException
@@ -28,12 +27,17 @@ class TrainRecyclerAdapter(private val context: Context,
 
     private val TAG = "TrainRecyclerAdapter"
 
+    private val childEventListeners = mutableMapOf<String, ChildEventListener>()
+    private val references = mutableMapOf<String, DatabaseReference>()
+
     init {
         startListening()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrainViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(modelLayout, parent, false)
+        val view = LayoutInflater
+                .from(parent.context)
+                .inflate(modelLayout, parent, false)
         try {
             val constructor = viewHolderClass.getConstructor(View::class.java)
             return constructor.newInstance(view)
@@ -53,17 +57,26 @@ class TrainRecyclerAdapter(private val context: Context,
         listener.onTrainListResult(holder, model, position)
     }
 
-    override fun onBindViewHolder(holder: TrainViewHolder, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(holder: TrainViewHolder, position: Int, payloads: List<Any>) {
         if(payloads.isEmpty())
-            onBindViewHolder(holder, position)
+            super.onBindViewHolder(holder, position, payloads)
         else {
             payloads.forEach {
                 when(it) {
-                // TODO: Fixa saker som payloads kan vara
-                    is Int -> holder.bindPassengerCount(it)
-                    else -> holder.bindPassengerCount(5)
+                    is DataSnapshot -> {
+                        when(it.key) {
+                            "title" -> holder.setTitle(it.value as String)
+                            "description" -> holder.setDescription(it.value as String)
+                            "passengerCount" -> holder.setPassengerCount(it.value.toString())
+                            else -> super.onBindViewHolder(holder, position, payloads)
+                        }
+                    }
+                    else -> holder.changePassengerCount("5")
                 }
             }
+        }
+        for((key, ref) in references) {
+            ref.removeEventListener(childEventListeners[key])
         }
     }
 
@@ -74,7 +87,7 @@ class TrainRecyclerAdapter(private val context: Context,
     override fun getItemCount() = trainSnapshots.size
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun startListening() {
+    private fun startListening() {
         if (!trainSnapshots.isListening(this)) {
             trainSnapshots.addChangeEventListener(this)
         }
@@ -100,31 +113,51 @@ class TrainRecyclerAdapter(private val context: Context,
 
     }
 
-    override fun onChildChanged(type: ChangeEventListener.EventType, snapshot: DataSnapshot, index: Int, oldIndex: Int) {
+    override fun onChildChanged(type: ChangeEventListener.EventType, snapshot: DataSnapshot,
+                                index: Int, oldIndex: Int) {
         when (type) {
             ChangeEventListener.EventType.ADDED -> notifyItemInserted(index)
-            ChangeEventListener.EventType.CHANGED -> notifyChildChange(snapshot, index)
-            ChangeEventListener.EventType.REMOVED -> notifyItemRemoved(index)
+            ChangeEventListener.EventType.CHANGED -> notifyChildChanged(snapshot, index)
             ChangeEventListener.EventType.MOVED -> notifyItemMoved(oldIndex, index)
+            ChangeEventListener.EventType.REMOVED -> notifyItemRemoved(index)
             else -> throw IllegalStateException("Incomplete case statement")
         }
     }
 
-    private fun notifyChildChange(snapshot: DataSnapshot, index: Int) {
-        // TODO: Kolla snapshot-barn och notifiera med rätt payload
-        notifyItemChanged(index, snapshot.child("title"))
-    }
+    private fun notifyChildChanged(snapshot: DataSnapshot, index: Int) {
+        Log.i(TAG, "Train has changed: $snapshot")
 
-//    fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
-//        // Set click listener for the whole train view
-//        viewHolder.itemView.setOnClickListener { v ->
-//            listener?.onTrainSelected(v.context, model.toMap(), position)
+        val eventListener = object : ChildEventListener {
+            override fun onChildAdded(childSnapshot: DataSnapshot, p1: String?) {
+            }
+
+            override fun onChildChanged(childSnapshot: DataSnapshot, p1: String?) {
+                Log.i(TAG, "Train child: $childSnapshot")
+                notifyItemChanged(index, childSnapshot)
+            }
+
+            override fun onChildMoved(childSnapshot: DataSnapshot, p1: String?) {
+            }
+
+            override fun onChildRemoved(childSnapshot: DataSnapshot) {
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, error.toString())
+            }
+        }
+
+        childEventListeners[snapshot.key] = eventListener
+        references[snapshot.key] = snapshot.ref
+
+//        val hasListener = childEventListeners.containsKey(snapshot.key)
+        snapshot.ref.addChildEventListener(eventListener)
+
+//        if(!hasListener) {
+//            val childMap = snapshot.children.associate { it.key to it.value }
+//            snapshot.ref.updateChildren(childMap)
 //        }
-//
-//        viewHolder.bindTrain(model)
-//
-//        showTrainsView()
-//    }
+    }
 
     interface TrainListListener {
         fun onTrainListResult(viewHolder: TrainViewHolder, model: Train, position: Int)

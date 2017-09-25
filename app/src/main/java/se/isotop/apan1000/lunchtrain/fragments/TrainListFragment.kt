@@ -21,9 +21,11 @@ import kotlinx.android.synthetic.main.fragment_train_list.view.*
 import kotlinx.android.synthetic.main.train_list.*
 import org.joda.time.DateTime
 import se.isotop.apan1000.lunchtrain.R
-import se.isotop.apan1000.lunchtrain.TrainRecyclerAdapter
 import se.isotop.apan1000.lunchtrain.model.Train
 import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
+import android.support.v7.widget.DefaultItemAnimator
+
+
 
 
 /**
@@ -34,7 +36,7 @@ import se.isotop.apan1000.lunchtrain.viewholder.TrainViewHolder
  * Use the [TrainListFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TrainListFragment : Fragment(), TrainRecyclerAdapter.TrainListListener {
+class TrainListFragment : Fragment() {
 
     private val TAG = "TrainListFragment"
 
@@ -85,12 +87,21 @@ class TrainListFragment : Fragment(), TrainRecyclerAdapter.TrainListListener {
 
         databaseRef = FirebaseDatabase.getInstance().reference
         val trainsQuery: Query = getQuery(databaseRef)
-        val parser = ClassSnapshotParser<Train>(Train::class.java)
-        val firebaseArray = FirebaseArray<Train>(trainsQuery, parser)
+//        val parser = ClassSnapshotParser<Train>(Train::class.java)
+//        val firebaseArray = FirebaseArray<Train>(trainsQuery, parser)
 
-        adapter = TrainRecyclerAdapter(context, firebaseArray, R.layout.train_list_item,
-                TrainViewHolder::class.java, this)
+//        adapter = TrainRecyclerAdapter(context, firebaseArray, R.layout.train_list_item,
+//                TrainViewHolder::class.java, this)
+        adapter = TrainRecyclerAdapter(Train::class.java, R.layout.train_list_item,
+                TrainViewHolder::class.java, trainsQuery)
         recyclerView.adapter = adapter
+
+        val animator = object : DefaultItemAnimator() {
+            override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder): Boolean {
+                return true
+            }
+        }
+        recyclerView.itemAnimator = animator
     }
 
     private fun getQuery(databaseReference: DatabaseReference): Query {
@@ -138,35 +149,38 @@ class TrainListFragment : Fragment(), TrainRecyclerAdapter.TrainListListener {
         fun onTrainSelected(context: Context, trainMap: MutableMap<String, Any>, position: Int)
     }
 
-//    inner class TrainRecyclerAdapter(modelClass: Class<Train>,
-//                                     modelLayout: Int,
-//                                     viewHolderClass: Class<TrainViewHolder>,
-//                                     query: Query)
-//        : FirebaseRecyclerAdapter<Train, TrainViewHolder>(
-//            modelClass,
-//            modelLayout,
-//            viewHolderClass,
-//            query) {
-//
-//        override fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
-//            // Set click listener for the whole train view
-//            viewHolder.itemView.setOnClickListener { v ->
-//                listener?.onTrainSelected(v.context, model.toMap(), position)
-//            }
-//
-//            viewHolder.bindTrain(model)
-//
-//            showTrainsView()
-//        }
-//    }
+    inner class TrainRecyclerAdapter(modelClass: Class<Train>,
+                                     modelLayout: Int,
+                                     viewHolderClass: Class<TrainViewHolder>,
+                                     query: Query)
+        : FirebaseRecyclerAdapter<Train, TrainViewHolder>(
+            modelClass,
+            modelLayout,
+            viewHolderClass,
+            query) {
 
-    override fun onTrainListResult(viewHolder: TrainViewHolder, model: Train, position: Int) {
-        viewHolder.itemView.setOnClickListener { v ->
-            listener?.onTrainSelected(v.context, model.toMap(), position)
+        override fun populateViewHolder(viewHolder: TrainViewHolder, model: Train, position: Int) {
+            // Set click listener for the whole train view
+            viewHolder.itemView.setOnClickListener { v ->
+                listener?.onTrainSelected(v.context, model.toMap(), position)
+            }
+
+            viewHolder.bindTrain(model)
+
+            showTrainsView()
         }
-
-        showTrainsView()
     }
+
+//    override fun onTrainListResult(viewHolder: TrainViewHolder, model: Train, position: Int) {
+//        // Set click listener for the whole train view
+//        viewHolder.itemView.setOnClickListener { v ->
+//            listener?.onTrainSelected(v.context, model.toMap(), position)
+//        }
+//
+//        viewHolder.bindTrain(model)
+//
+//        showTrainsView()
+//    }
 
     companion object {
         /**
