@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.view.animation.ScaleAnimation
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -39,8 +40,17 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         with(train) {
             itemView.train_image_loader.visibility = View.VISIBLE
 
-            setTitle(title)
-            setDescription(description)
+            if(oldTrain.title.isEmpty())
+                setTitle(title)
+            else if(title != oldTrain.title)
+                setTitle(title, true)
+
+            if(oldTrain.description.isEmpty())
+                setDescription(description)
+            else if(description != oldTrain.description)
+                setDescription(description)
+
+
             setTime(time)
             setPassengerCount(passengerCount.toString())
 
@@ -52,17 +62,32 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
             itemView.join_button.setOnClickListener { onJoinClicked(id) }
         }
+        oldTrain = train
     }
 
-    fun setTitle(title: String) {
+    fun reset() {
+        oldTrain = Train()
+    }
+
+    fun setTitle(title: String, animate: Boolean = false) {
         itemView.train_title.text = title
+        if(animate) {
+            val anim = AnimationUtils.loadAnimation(itemView.context, R.anim.clockwise)
+//            anim.duration = 890
+//            anim.setInterpolator(itemView.context, android.R.anim.bounce_interpolator)
+
+            itemView.train_title.startAnimation(anim)
+            setAnimation(itemView.train_title)
+        }
     }
 
     fun setDescription(description: String) {
         if(description.isNotEmpty())
             itemView.train_description.text = description
-        else
-            itemView.train_description.text = itemView.resources.getString(R.string.default_description)
+        else {
+            oldTrain.description = itemView.resources.getString(R.string.default_description)
+            itemView.train_description.text = oldTrain.description
+        }
     }
 
     fun setTime(time: String) {
@@ -123,7 +148,11 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         itemView.join_button.isEnabled = true
     }
 
-    private fun setJoinButtonColor(defaultId: Int, pressedId: Int = defaultId, disabledId: Int = defaultId) {
+    private fun setAnimation(viewToAnimate: View) {
+
+    }
+
+        private fun setJoinButtonColor(defaultId: Int, pressedId: Int = defaultId, disabledId: Int = defaultId) {
         val defaultColor = ContextCompat.getColor(itemView.context, defaultId)
         val pressedColor = ContextCompat.getColor(itemView.context, pressedId)
         val disabledColor = ContextCompat.getColor(itemView.context, disabledId)
@@ -143,6 +172,8 @@ class TrainViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
 
     private fun onJoinClicked(trainId: String) {
+        if(itemView.join_button.isSelected)
+            itemView.join_button.isSelected = false
         disableJoinButton()
         FirebaseHelper.joinOrLeaveTrain(trainId)
     }

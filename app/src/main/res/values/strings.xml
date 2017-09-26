@@ -110,10 +110,13 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="title_train_list">Food Trains</string>
     <string name="title_train_detail">Train Detail</string>
     <string name="title_activity_create_train">Create New Train</string>
     <string name="clear_text">Clear text</string>
     <string name="destination_image">Destination image</string>
+    <string name="train_title_trans">train_title</string>
+    <string name="image_overlay_trans">image_overlay</string>
+    <string name="train_image_trans">train_image</string>
 </resources>

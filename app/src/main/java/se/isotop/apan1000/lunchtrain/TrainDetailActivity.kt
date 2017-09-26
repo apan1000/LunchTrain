@@ -101,6 +101,7 @@ class TrainDetailActivity : AppCompatActivity(), TrainDetailFragment.TrainDetail
 
     override fun onTrainDetailUpdate(train: Train) {
         toolbar_layout.title = train.title
+//        train_title.text = train.title
 
         if (train.imgUrl.isNotEmpty())
             loadTrainDetailImage(train.imgUrl)

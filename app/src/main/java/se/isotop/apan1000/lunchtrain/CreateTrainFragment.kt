@@ -55,8 +55,8 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
     // TODO: Hantera clear-knappar
 
     // TODO: ändra till icke-hårdkodat (kanske använda gps)
-    private val BOUNDS_GREATER_SYDNEY = LatLngBounds(
-            LatLng(-34.041458, 150.790100), LatLng(-33.682247, 151.383362))
+    private val MAP_BOUNDS = LatLngBounds(
+            LatLng(59.034591, 18.063240), LatLng(59.534591, 18.563240))
 
     private var listener: CreateTrainInteractionListener? = null
 
@@ -115,7 +115,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
 
         // Register a listener that receives callbacks when a suggestion has been selected
         autocompleteView.onItemClickListener = autocompleteClickListener
-        placeAdapter = PlaceAutocompleteAdapter(context, googleApiClient, BOUNDS_GREATER_SYDNEY,
+        placeAdapter = PlaceAutocompleteAdapter(context, googleApiClient, MAP_BOUNDS,
                 null)
         autocompleteView.setAdapter(placeAdapter)
 
@@ -135,7 +135,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
     override fun onDestroy() {
         super.onDestroy()
         autocompleteView.onItemClickListener = null
-        urlEdit.removeTextChangedListener(urlTextWatcher)
+//        urlEdit.removeTextChangedListener(urlTextWatcher)
     }
 
     override fun onDetach() {
@@ -151,9 +151,11 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
     private fun initEditTextViews() {
         autocompleteView = root.autocomplete_places
         descriptionEdit = root.edit_description
-        urlEdit = root.edit_img_url
+//        urlEdit = root.edit_img_url
 
-        urlEdit.addTextChangedListener(urlTextWatcher)
+//        urlEdit.addTextChangedListener(urlTextWatcher)
+        autocompleteView.addTextChangedListener(textWatcher)
+        descriptionEdit.addTextChangedListener(textWatcher)
     }
 
     private fun initClearTextButton() {
@@ -203,16 +205,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
         submitTrainButton.isEnabled = titleIsOk && descIsOk && imgIsOk
     }
 
-    private val urlTextWatcher = object : TextWatcher {
-        private val p = Pattern.compile(".*\\.(gif|jpe?g|png|webp)$")
-
-        override fun afterTextChanged(editable: Editable?) {
-            val imgUrl = editable.toString()
-            setImageUrl(imgUrl)
-
-            checkIfValidTrain()
-        }
-
+    private val textWatcher = object : TextWatcher {
         override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             // Do nothing
         }
@@ -221,40 +214,63 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
             // Do nothing
         }
 
-        private fun setImageUrl(imgUrl: String) {
-            when {
-                imgUrl.isEmpty() -> {
-                    imgIsOk = true
-
-                    imgView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.food_train))
-                }
-                p.matcher(imgUrl).matches() -> {
-                    imgIsOk = true
-                    root.image_loader.visibility = View.VISIBLE
-
-                    val requestOptions = RequestOptions()
-                    requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-
-                    Glide.with(context)
-                            .load(imgUrl)
-                            .listener(object : RequestListener<Drawable> {
-                                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                                    root.image_loader.visibility = View.INVISIBLE
-                                    return false
-                                }
-
-                                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                                    root.image_loader.visibility = View.INVISIBLE
-                                    return false
-                                }
-                            })
-                            .apply(requestOptions)
-                            .into(imgView)
-                }
-                else -> imgIsOk = false
-            }
+        override fun afterTextChanged(p0: Editable?) {
+            checkIfValidTrain()
         }
     }
+
+//    private val urlTextWatcher = object : TextWatcher {
+//        private val p = Pattern.compile(".*\\.(gif|jpe?g|png|webp)$")
+//
+//        override fun afterTextChanged(editable: Editable?) {
+//            val imgUrl = editable.toString()
+//            setImageUrl(imgUrl)
+//
+//            checkIfValidTrain()
+//        }
+//
+//        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//            // Do nothing
+//        }
+//
+//        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//            // Do nothing
+//        }
+//
+//        private fun setImageUrl(imgUrl: String) {
+//            when {
+//                imgUrl.isEmpty() -> {
+//                    imgIsOk = true
+//
+//                    imgView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.food_train))
+//                }
+//                p.matcher(imgUrl).matches() -> {
+//                    imgIsOk = true
+//                    root.image_loader.visibility = View.VISIBLE
+//
+//                    val requestOptions = RequestOptions()
+//                    requestOptions.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+//
+//                    Glide.with(context)
+//                            .load(imgUrl)
+//                            .listener(object : RequestListener<Drawable> {
+//                                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+//                                    root.image_loader.visibility = View.INVISIBLE
+//                                    return false
+//                                }
+//
+//                                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+//                                    root.image_loader.visibility = View.INVISIBLE
+//                                    return false
+//                                }
+//                            })
+//                            .apply(requestOptions)
+//                            .into(imgView)
+//                }
+//                else -> imgIsOk = false
+//            }
+//        }
+//    }
 
     /**
      * Listener that handles selections from suggestions from the AutoCompleteTextView that
@@ -294,7 +310,7 @@ class CreateTrainFragment : Fragment(), GoogleApiClient.OnConnectionFailedListen
             }
 
             if(placePhotos.photoMetadata.count > 0) {
-                // TODO: Visa placePhotos.photoMetadata[0].attributions vid bilden
+                // TODO: Visa placePhotos.photoMetadata[0].attributions vid bilden & spara i FB
                 placePhotos.photoMetadata[0].getPhoto(googleApiClient).setResultCallback { photoResult ->
                     if (photoResult.status.isSuccess) {
                         trainImage = photoResult.bitmap

@@ -25,6 +25,7 @@
 
         <ImageView
             android:id="@+id/train_image"
+            android:transitionName="@string/train_image_trans"
             android:layout_width="match_parent"
             android:layout_height="@dimen/card_image_height"
             android:scaleType="centerCrop"
@@ -35,6 +36,8 @@
             app:srcCompat="@drawable/food_train"/>
 
         <FrameLayout
+            android:id="@+id/image_overlay"
+            android:transitionName="@string/image_overlay_trans"
             android:layout_width="match_parent"
             android:layout_height="@dimen/card_image_height"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -55,6 +58,7 @@
 
         <TextView
             android:id="@+id/train_title"
+            android:transitionName="@string/train_title_trans"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/card_title_padding"

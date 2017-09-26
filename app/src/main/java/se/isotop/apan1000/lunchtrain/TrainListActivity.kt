@@ -21,6 +21,8 @@ import se.isotop.apan1000.lunchtrain.fragments.TrainDetailFragment
 import se.isotop.apan1000.lunchtrain.fragments.TrainListFragment
 import se.isotop.apan1000.lunchtrain.model.Train
 import java.io.Serializable
+import android.support.v4.app.ActivityOptionsCompat
+import android.support.v4.util.Pair
 
 
 /**
@@ -89,7 +91,11 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
         }
     }
 
-    override fun onTrainSelected(context: Context, trainMap: MutableMap<String, Any>, position: Int) {
+    override fun onTrainSelected(context: Context, trainMap: MutableMap<String, Any>,
+                                 position: Int,
+                                 trainImage: View?,
+                                 trainImageOverlay: View?,
+                                 trainTitle: View?) {
         if (twoPane) {
             val fragment = TrainDetailFragment
                     .newInstance(position, trainMap as Serializable)
@@ -101,7 +107,13 @@ class TrainListActivity : AppCompatActivity(), TrainListFragment.OnTrainInteract
             intent.putExtra(TrainDetailFragment.ARG_ITEM_ID, position)
             intent.putExtra(TrainDetailFragment.ARG_MAP, trainMap as Serializable)
 
-            context.startActivity(intent)
+            val options = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(this,
+                            Pair.create(trainImage, "train_image"),
+                            Pair.create(trainImageOverlay, "image_overlay"))
+//                            Pair.create(trainTitle, "train_title"))
+
+            context.startActivity(intent, options.toBundle())
         }
     }
 
